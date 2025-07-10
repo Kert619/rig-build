@@ -18,10 +18,12 @@ return new class extends Migration
             $table->foreignId('node_id')->nullable()->constrained('nodes', 'node_id')->nullOnDelete();
             $table->string('price_name');
             $table->foreignId('store_id')->constrained('stores', 'store_id');
-            $table->string('external_id')->nullable();
+            $table->string('price_store_ident');
             $table->char('currency', 3);
             $table->decimal('price', 16);
-            $table->integer('price_stocks')->nullable();
+            $table->string('stock_status')->nullable();
+            $table->integer('stock_quantity')->nullable();
+            $table->string('rating')->nullable();
             $table->string('price_url', 500);
             $table->timestamps();
 

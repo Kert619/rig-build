@@ -1,41 +1,68 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+    <q-header bordered>
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
+        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
 
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
+        <q-toolbar-title> Rig Build </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <div>
+          <q-toggle
+            v-model="darkMode"
+            :label="darkMode ? 'Dark' : 'Light'"
+            unchecked-icon="brightness_5"
+            checked-icon="bedtime"
+            color="dark"
+          />
+        </div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered behavior="mobile">
       <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
+        <q-item-label header> Rig Build </q-item-label>
 
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
+        <q-expansion-item expand-separator icon="storage" label="Database">
+          <q-item :inset-level="1" clickable to="/stores">
+            <q-item-section avatar>
+              <q-icon name="storefront" />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>Stores</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item :inset-level="1" clickable to="/product-hierarchy">
+            <q-item-section avatar>
+              <q-icon name="polyline" />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>Product Hierarchy</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item :inset-level="1" clickable to="/categories">
+            <q-item-section avatar>
+              <q-icon name="category" />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>Categories</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-expansion-item>
+
+        <q-item clickable @click="logout">
+          <q-item-section avatar>
+            <q-icon name="logout" />
+          </q-item-section>
+
+          <q-item-section>
+            <q-item-label>Logout</q-item-label>
+          </q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 
@@ -46,57 +73,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import EssentialLink, { type EssentialLinkProps } from 'components/EssentialLink.vue';
+import { ref, watch } from 'vue';
+import { useQuasar } from 'quasar';
+import { useAuthStore } from 'src/stores/auth';
 
-const linksList: EssentialLinkProps[] = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-];
-
+const $q = useQuasar();
+const authStore = useAuthStore();
 const leftDrawerOpen = ref(false);
+const darkMode = ref(localStorage.getItem('color_scheme') == 'true' ? true : false);
 
-function toggleLeftDrawer () {
+const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
-}
+};
+
+const logout = async () => {
+  await authStore.logout();
+};
+
+watch(darkMode, (newVal) => {
+  $q.dark.set(newVal);
+  localStorage.setItem('color_scheme', newVal ? 'true' : 'false');
+});
 </script>

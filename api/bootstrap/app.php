@@ -13,9 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->statefulApi();
-        $middleware->redirectGuestsTo(function () {
-            return response()->json(['message' => 'Please login to continue'], 401);
-        });
+        // $middleware->redirectGuestsTo(function () {
+        //     return response()->json(['message' => 'Please login to continue'], 401);
+        // });
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
