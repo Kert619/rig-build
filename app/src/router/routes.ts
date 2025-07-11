@@ -6,7 +6,7 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     beforeEnter: [authGuard],
-    children: [],
+    children: [{ path: '/stores', component: () => import('pages/StoresPage.vue') }],
   },
   {
     path: '/auth',

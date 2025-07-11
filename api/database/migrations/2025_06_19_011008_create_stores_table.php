@@ -14,7 +14,14 @@ return new class extends Migration
         Schema::create('stores', function (Blueprint $table) {
             $table->id('store_id');
             $table->string('name')->unique();
-            $table->string('store_url')->nullable();
+            $table->char('country_code');
+            $table->string('store_url');
+
+            $table->foreign('country_code')
+                ->references('country_code')
+                ->on('countries')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
         });
     }
 
