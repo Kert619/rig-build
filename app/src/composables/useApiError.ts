@@ -12,8 +12,6 @@ export const useApiError = <T>(error: unknown, fallback = 'Something went wrong'
     Notify.create({
       message,
       type: 'negative',
-      position: 'bottom-right',
-      progress: false,
     });
     return null;
   }

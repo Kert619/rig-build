@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('currencies', function (Blueprint $table) {
             $table->char('currency_code', 3)->primary();
+            $table->timestamps();
         });
     }
 

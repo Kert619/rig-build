@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('brand_id')->constrained('brands', 'node_id');
             $table->foreignId('category_id')->constrained('categories', 'category_id');
             $table->foreign('node_id')->references('node_id')->on('nodes')->cascadeOnDelete();
+            $table->timestamps();
         });
     }
 

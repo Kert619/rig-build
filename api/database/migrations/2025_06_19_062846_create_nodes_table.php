@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('node_not_regexp')->nullable();
             $table->foreignId('node_type_id')->constrained('node_types', 'node_type_id');
             $table->foreignId('parent_node_id')->nullable()->constrained('nodes', 'node_id')->cascadeOnDelete();
+            $table->timestamps();
         });
     }
 

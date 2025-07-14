@@ -6,7 +6,10 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     beforeEnter: [authGuard],
-    children: [{ path: '/stores', component: () => import('pages/StoresPage.vue') }],
+    children: [
+      { path: '/stores', component: () => import('pages/StoresPage.vue') },
+      { path: '/countries', component: () => import('pages/CountriesPage.vue') },
+    ],
   },
   {
     path: '/auth',

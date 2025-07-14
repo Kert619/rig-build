@@ -21,6 +21,13 @@ abstract class Controller
 
     protected abstract function columns(): array;
 
+    protected abstract function rules(): array;
+
+    protected function updateRules(): array
+    {
+        return $this->rules();
+    }
+
     protected function with(): array
     {
         return [];
@@ -29,16 +36,6 @@ abstract class Controller
     protected function where(): array
     {
         return [];
-    }
-
-    protected function rules(): array
-    {
-        return [];
-    }
-
-    protected function updateRules(): array
-    {
-        return $this->rules();
     }
 
     public function index(Request $request): JsonResponse
@@ -51,7 +48,7 @@ abstract class Controller
             }
         }
 
-        return $query->get();
+        return response()->json($query->get());
     }
 
     public function store(Request $request): JsonResponse
@@ -60,10 +57,12 @@ abstract class Controller
 
         $row = $this->model::create($validated);
 
-        return $this->model::select($this->columns())
+        $created = $this->model::select($this->columns())
             ->with($this->with())
             ->where($this->primarykey, $row[$this->primarykey])
             ->firstOrFail();
+
+        return response()->json($created);
     }
 
     public function update($id, Request $request): JsonResponse
@@ -74,18 +73,22 @@ abstract class Controller
 
         $row->update($validated);
 
-        return $this->model::select($this->columns())
+        $updated =  $this->model::select($this->columns())
             ->with($this->with())
             ->where($this->primarykey, $row[$this->primarykey])
             ->firstOrFail();
+
+        return response()->json($updated);
     }
 
     public function show($id): JsonResponse
     {
-        return $this->model::select($this->columns())
+        $row = $this->model::select($this->columns())
             ->with($this->with())
             ->where($this->primarykey, $id)
             ->firstOrFail();
+
+        return response()->json($row);
     }
 
     public function destroy($id): JsonResponse

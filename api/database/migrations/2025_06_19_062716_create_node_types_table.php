@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('node_types', function (Blueprint $table) {
             $table->id('node_type_id');
             $table->string('node_type_name')->unique();
+            $table->timestamps();
         });
     }
 

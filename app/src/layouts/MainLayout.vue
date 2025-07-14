@@ -23,6 +23,16 @@
         <q-item-label header> Rig Build </q-item-label>
 
         <q-expansion-item expand-separator icon="storage" label="Database">
+          <q-item :inset-level="1" clickable to="/countries">
+            <q-item-section avatar>
+              <q-icon name="flag" />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>Countries</q-item-label>
+            </q-item-section>
+          </q-item>
+
           <q-item :inset-level="1" clickable to="/stores">
             <q-item-section avatar>
               <q-icon name="storefront" />

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->char('country_code');
             $table->string('store_url');
+            $table->timestamps();
 
             $table->foreign('country_code')
                 ->references('country_code')

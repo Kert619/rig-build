@@ -15,6 +15,7 @@ return new class extends Migration
             $table->unsignedBigInteger('node_id')->primary();
             $table->string('brand_website')->nullable();
             $table->foreign('node_id')->references('node_id')->on('nodes')->cascadeOnDelete();
+            $table->timestamps();
         });
     }
 

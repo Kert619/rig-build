@@ -1,9 +1,9 @@
 <template>
   <q-page>
-    <CiIndex />
+    <AppIndex />
   </q-page>
 </template>
 
 <script setup lang="ts">
-import CiIndex from 'components/Stores/CiIndex.vue';
+import AppIndex from 'components/Stores/AppIndex.vue';
 </script>

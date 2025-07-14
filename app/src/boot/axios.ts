@@ -31,7 +31,7 @@ api.interceptors.response.use(null, function (error) {
   if (error.response.status === 401 && path != '/auth/login') {
     window.location.href = '/auth/login';
   }
-  return Promise.reject(new Error('Unauthenticated'));
+  return Promise.reject(error as Error);
 });
 
 export default defineBoot(({ app }) => {

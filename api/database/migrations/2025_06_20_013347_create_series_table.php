@@ -15,6 +15,7 @@ return new class extends Migration
             $table->unsignedBigInteger('node_id')->primary();
             $table->foreignId('category_id')->constrained('categories', 'category_id');
             $table->foreign('node_id')->references('node_id')->on('nodes')->cascadeOnDelete();
+            $table->timestamps();
         });
     }
 

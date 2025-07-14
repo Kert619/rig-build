@@ -17,7 +17,14 @@ class CountryController extends Controller
     {
         return [
             'country_code' => 'required|string|max:2|unique:countries,country_code',
-            'country_name' => 'required|string|max:255:unique:countries,country_name',
+            'country_name' => 'required|string|max:255,unique:countries,country_name',
+        ];
+    }
+
+    public function updateRules(): array
+    {
+        return [
+            'country_name' => 'required|string|max:255,unique:countries,country_name',
         ];
     }
 }
