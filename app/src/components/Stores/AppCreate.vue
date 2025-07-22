@@ -8,26 +8,37 @@
           flat
           icon="close"
           color="negative"
+          size="sm"
           @click="emit('delete', storeRef.$id?.toString()!)"
         />
       </q-card-section>
       <q-form class="row q-col-gutter-md" @submit="handleSubmit">
         <div class="col-6">
-          <q-input
+          <TextInput
             v-model="storeRef.store_name"
             label="Store Name"
-            dense
-            hide-bottom-space
-            square
+            :error="!!error?.store_name"
+            :error-message="error?.store_name?.toString()"
           />
         </div>
 
         <div class="col-6">
-          <q-input v-model="storeRef.country_code" label="Country" dense hide-bottom-space square />
+          <SelectOptions
+            v-model="storeRef.country_code"
+            :options="countryStore.options"
+            :error="!!error?.country_code"
+            :error-message="error?.country_code?.toString()"
+            label="Country"
+          />
         </div>
 
         <div class="col-12">
-          <q-input v-model="storeRef.store_url" label="Store Url" dense hide-bottom-space square />
+          <TextInput
+            v-model="storeRef.store_url"
+            label="Store Url"
+            :error="!!error?.store_url"
+            :error-message="error?.store_url?.toString()"
+          />
         </div>
 
         <div class="col-12">
@@ -39,6 +50,8 @@
             size="sm"
             unelevated
             icon="save"
+            glossy
+            :loading="storeRef.$loading"
           />
         </div>
       </q-form>
@@ -47,20 +60,26 @@
 </template>
 
 <script setup lang="ts">
-import { type Store } from 'src/stores/store';
+import { type StoreError, type Store } from 'src/stores/store';
 import { toRef } from 'vue';
+import SelectOptions from 'components/UI/SelectOptions.vue';
+import TextInput from 'components/UI/TextInput.vue';
+import { useCountryStore } from 'src/stores/country';
 
 const emit = defineEmits<{
-  save: [id: string, store: Store];
+  save: [id: string];
   delete: [id: string];
 }>();
 const props = defineProps<{
   store: Store;
+  error?: StoreError | undefined;
 }>();
+
+const countryStore = useCountryStore();
 
 const storeRef = toRef(props.store);
 
 const handleSubmit = () => {
-  console.log('Submitted');
+  emit('save', storeRef.value.$id?.toString() ?? '');
 };
 </script>

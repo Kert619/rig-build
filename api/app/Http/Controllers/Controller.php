@@ -12,6 +12,7 @@ abstract class Controller
     protected string $modelClass;
     protected Model $model;
     protected readonly string $primarykey;
+    protected string $optionColumn;
 
     public function __construct()
     {
@@ -23,10 +24,7 @@ abstract class Controller
 
     protected abstract function rules(): array;
 
-    protected function updateRules(): array
-    {
-        return $this->rules();
-    }
+    protected abstract function updateRules($id): array;
 
     protected function with(): array
     {
@@ -51,6 +49,14 @@ abstract class Controller
         return response()->json($query->get());
     }
 
+    public function options()
+    {
+        if (!$this->optionColumn) return [];
+
+        $query = $this->model::select(["$this->primarykey AS value", "$this->optionColumn AS label"]);
+        return $query->get();
+    }
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate($this->rules());
@@ -67,7 +73,7 @@ abstract class Controller
 
     public function update($id, Request $request): JsonResponse
     {
-        $validated = $request->validate($this->updateRules());
+        $validated = $request->validate($this->updateRules($id));
 
         $row = $this->model::findOrFail($id);
 

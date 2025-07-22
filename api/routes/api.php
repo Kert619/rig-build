@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\ScraperController;
 use App\Http\Controllers\StoreController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -10,6 +11,11 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     })->middleware('auth:sanctum');
 
+    Route::get('countries/options', [CountryController::class, 'options']);
     Route::apiResource('countries', CountryController::class);
+
+    Route::get('stores/options', [StoreController::class, 'options']);
     Route::apiResource('stores', StoreController::class);
+
+    Route::apiResource('scrapers', ScraperController::class);
 });

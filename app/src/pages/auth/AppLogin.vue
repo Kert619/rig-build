@@ -9,30 +9,29 @@
         <q-separator inset />
 
         <q-card-section class="q-mt-lg">
-          <div class="column q-gutter-y-md">
-            <q-input
+          <div class="column q-gutter-y-lg">
+            <TextInput
               v-model="form.email"
               label="Email"
-              dense
               :error="!!authStore.loginError?.email"
               :error-message="authStore.loginError?.email?.toString()"
             >
               <template v-slot:prepend>
                 <q-icon name="email" />
               </template>
-            </q-input>
-            <q-input
+            </TextInput>
+
+            <TextInput
               v-model="form.password"
               label="Password"
               type="password"
-              dense
               :error="!!authStore.loginError?.password"
               :error-message="authStore.loginError?.password?.toString()"
             >
               <template v-slot:prepend>
                 <q-icon name="lock" />
               </template>
-            </q-input>
+            </TextInput>
             <q-btn label="Login" color="positive" unelevated @click="login" :loading="loading" />
             <div class="row justify-center">
               Forgot Password?
@@ -54,6 +53,7 @@
 import { useAuthStore, type LoginInfo } from 'src/stores/auth';
 import { ref, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
+import TextInput from 'components/UI/TextInput.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();

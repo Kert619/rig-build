@@ -9,3 +9,29 @@ body {
   text-decoration: underline;
   cursor: pointer;
 }
+
+.q-table {
+  .q-field {
+    height: 35px;
+  }
+
+  .q-field__control {
+    height: 100%;
+  }
+
+  .q-field__append {
+    height: auto;
+  }
+
+  .q-field__bottom {
+    padding: 0;
+    height: min-content;
+    min-height: min-content;
+    position: absolute;
+    bottom: -2px;
+  }
+
+  .q-field__native {
+    margin-bottom: 5px;
+  }
+}

@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('scrapers', function (Blueprint $table) {
             $table->id('scraper_id');
+            $table->foreignId('store_id')->constrained('stores', 'store_id');
             $table->string('scraper_name');
+            $table->string('scraper_url');
             $table->json('scraper_config');
             $table->tinyInteger('is_running')->default(0);
             $table->tinyInteger('is_active')->default(0);
+            $table->timestamp('last_run')->nullable();
             $table->timestamps();
         });
     }

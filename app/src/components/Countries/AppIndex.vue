@@ -7,6 +7,7 @@
       flat
       bordered
       dense
+      square
       :loading="loading"
     >
       <template #top>
@@ -18,14 +19,12 @@
             dense
             size="sm"
             unelevated
+            glossy
             @click="countryStore.create()"
           />
 
-          <q-input
+          <TextInput
             v-model="search"
-            dense
-            outlined
-            square
             clearable
             debounce="600"
             placeholder="Search country"
@@ -35,7 +34,7 @@
             <template #prepend>
               <q-icon name="search" />
             </template>
-          </q-input>
+          </TextInput>
 
           <span class="text-body2">Countries</span>
         </div>
@@ -52,11 +51,14 @@
         />
       </template>
 
-      <template #body="props" v-if="!refresh">
+      <template #body="props">
         <AppEdit
+          v-if="!countryStore.refresh"
           :country="props.row"
-          @delete="handleDelete(props.row.country_code, true)"
+          :error="countryStore.currentErrors.get(props.row.country_code)"
+          @delete="(id: string, country: Country) => handleDelete(id, true, country)"
           @save="handleUpdated"
+          :key="props.row.country_code"
         />
       </template>
     </q-table>
@@ -69,12 +71,12 @@ import AppCreate from 'components/Countries/AppCreate.vue';
 import AppEdit from 'components/Countries/AppEdit.vue';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import { type Country, useCountryStore } from 'src/stores/country';
+import TextInput from 'components/UI/TextInput.vue';
 
 const $q = useQuasar();
 const countryStore = useCountryStore();
 const loading = ref(false);
 const search = ref('');
-const refresh = ref(false);
 
 const columns: QTableColumn[] = [
   {
@@ -103,31 +105,34 @@ onMounted(async () => {
 });
 
 const loadCountries = async () => {
-  loading.value = true;
-  await countryStore.fetchIndex();
-  loading.value = false;
+  try {
+    loading.value = true;
+    await countryStore.fetchIndex();
+  } finally {
+    loading.value = false;
+  }
 };
 
 const countries = computed(() => {
-  if (search.value.trim()) {
-    return countryStore.countries.filter((country) => {
+  if (search.value) {
+    return countryStore.index.filter((country) => {
       const hasCountryCode = country.country_code
         .toLowerCase()
-        .includes(search.value.trim().toLowerCase());
+        .includes(search.value.toLowerCase());
       const hasCountryName = country.country_name
         .toLowerCase()
-        .includes(search.value.trim().toLowerCase());
+        .includes(search.value.toLowerCase());
 
       return hasCountryCode || hasCountryName;
     });
   } else {
-    return countryStore.countries;
+    return countryStore.index;
   }
 });
 
 const created = computed(() => Array.from(countryStore.created.values()));
 
-const handleDelete = (id: string, edit = false) => {
+const handleDelete = (id: string, edit = false, country: Country | null = null) => {
   if (edit) {
     $q.dialog({
       title: 'Confirm',
@@ -135,7 +140,8 @@ const handleDelete = (id: string, edit = false) => {
       cancel: true,
     }).onOk(() => {
       void (async () => {
-        loading.value = true;
+        if (!country) return;
+        countryStore.current.set(id, country);
         await countryStore.destroy(id);
         await loadCountries();
         await handleRefresh();
@@ -148,14 +154,12 @@ const handleDelete = (id: string, edit = false) => {
 };
 
 const handleSave = async (id: string) => {
-  loading.value = true;
   await countryStore.store(id);
   await loadCountries();
   await handleRefresh();
 };
 
 const handleUpdated = async (id: string, country: Country) => {
-  loading.value = true;
   countryStore.current.set(id, country);
   await countryStore.update(id);
   await loadCountries();
@@ -163,8 +167,8 @@ const handleUpdated = async (id: string, country: Country) => {
 };
 
 const handleRefresh = async () => {
-  refresh.value = true;
+  countryStore.refresh = true;
   await nextTick();
-  refresh.value = false;
+  countryStore.refresh = false;
 };
 </script>

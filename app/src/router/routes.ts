@@ -7,8 +7,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     beforeEnter: [authGuard],
     children: [
-      { path: '/stores', component: () => import('pages/StoresPage.vue') },
-      { path: '/countries', component: () => import('pages/CountriesPage.vue') },
+      {
+        path: 'stores',
+        component: () => import('pages/Stores/IndexPage.vue'),
+        children: [{ path: ':id', component: () => import('pages/Stores/StorePage.vue') }],
+      },
+      { path: 'countries', component: () => import('pages/CountriesPage.vue') },
     ],
   },
   {

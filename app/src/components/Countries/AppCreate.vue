@@ -1,31 +1,28 @@
 <template>
   <q-tr>
     <q-td>
-      <q-input
+      <TextInput
         v-model="countryRef.country_code"
-        dense
         borderless
-        hide-bottom-space
+        max-length="2"
         :error="!!error?.country_code"
         :error-message="error?.country_code?.toString()"
       />
     </q-td>
     <q-td>
-      <q-input
+      <TextInput
         v-model="countryRef.country_name"
-        dense
         borderless
-        hide-bottom-space
         :error="!!error?.country_name"
         :error-message="error?.country_name?.toString()"
       />
     </q-td>
     <q-td auto-width>
-      <TableAction>
-        <q-item clickable v-close-popup @click="emit('save', country.$id?.toString()!)">
+      <TableAction :loading="countryRef.$loading">
+        <q-item clickable v-close-popup @click="emit('save', countryRef.$id?.toString()!)">
           <q-item-section>Save</q-item-section>
         </q-item>
-        <q-item clickable v-close-popup @click="emit('delete', country.$id?.toString()!)">
+        <q-item clickable v-close-popup @click="emit('delete', countryRef.$id?.toString()!)">
           <q-item-section>Delete</q-item-section>
         </q-item>
       </TableAction>
@@ -37,6 +34,7 @@
 import { type CountryError, type Country } from 'src/stores/country';
 import { toRef } from 'vue';
 import TableAction from 'components/UI/TableAction.vue';
+import TextInput from 'components/UI/TextInput.vue';
 
 const emit = defineEmits<{
   delete: [id: string];
