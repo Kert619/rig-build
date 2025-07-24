@@ -26,24 +26,38 @@ abstract class Controller
 
     protected abstract function updateRules($id): array;
 
+    protected function messages(): array
+    {
+        return [];
+    }
+
+    protected function fieldNames(): array
+    {
+        return [];
+    }
+
     protected function with(): array
     {
         return [];
     }
 
-    protected function where(): array
+    protected function orderBy(): array
     {
-        return [];
+        return [$this->primarykey => 'desc'];
     }
 
     public function index(Request $request): JsonResponse
     {
         $query = $this->model::select($this->columns())->with($this->with());
 
-        foreach ($this->where() as $field) {
-            if ($request->filled($field)) {
-                $query->where($field, $request->input($field));
+        foreach ($request->all() as $field => $value) {
+            if (!empty($value)) {
+                $query->where($field, $value);
             }
+        }
+
+        foreach ($this->orderBy() as $field => $order) {
+            $query->orderBy($field, $order);
         }
 
         return response()->json($query->get());
@@ -59,7 +73,7 @@ abstract class Controller
 
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate($this->rules());
+        $validated = $request->validate($this->rules(), $this->messages(), $this->fieldNames());
 
         $row = $this->model::create($validated);
 
@@ -73,7 +87,7 @@ abstract class Controller
 
     public function update($id, Request $request): JsonResponse
     {
-        $validated = $request->validate($this->updateRules($id));
+        $validated = $request->validate($this->updateRules($id), $this->messages(), $this->fieldNames());
 
         $row = $this->model::findOrFail($id);
 

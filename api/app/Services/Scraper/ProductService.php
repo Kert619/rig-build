@@ -177,7 +177,7 @@ class ProductService
             throw new InvalidPageRuleException();
         }
 
-        return $pageRules[$index];
+        return $pageRules[$index]['value'];
     }
 
     private function extractFieldValue(string $pageRule, string $html, int $group)

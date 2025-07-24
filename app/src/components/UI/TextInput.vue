@@ -8,6 +8,8 @@
     :type="type"
     :error="error"
     :error-message="errorMessage"
+    :lazy-rules="lazyRules"
+    :rules="rules"
     :placeholder="placeholder"
     :borderless="borderless"
     :clearable="clearable"
@@ -36,12 +38,14 @@
 </template>
 
 <script setup lang="ts">
-import { type QInputType } from 'quasar';
+import { type ValidationRule, type QInputType } from 'quasar';
 
 defineProps<{
   label?: string;
   error?: boolean;
   errorMessage?: string | undefined;
+  lazyRules?: boolean;
+  rules?: ValidationRule[];
   type?: QInputType;
   filled?: boolean;
   outlined?: boolean;

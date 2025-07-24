@@ -11,12 +11,48 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('scrapers', function (Blueprint $table) {
+        $default = json_encode([
+            'category' => [
+                'container_regex' => '',
+                'regex' => '',
+            ],
+            'product' => [
+                'method' => 'regex',
+                'container_regex' => '',
+                'regex' => '',
+                'container_selector' => '',
+                'selector' => '',
+                'pagination' => [
+                    'base_pagination_link' => '',
+                    'container_regex' => '',
+                    'page_query' => '',
+                    'pages_regex' => '',
+                ],
+                'ajax' => [
+                    'api_base_url' => '',
+                    'product_link_base_url' => '',
+                ],
+                'format' => [
+                    'currency' => '',
+                    'img_url' => '',
+                    'price' => '',
+                    'price_name' => '',
+                    'price_store_ident' => '',
+                    'price_url' => '',
+                    'rating' => '',
+                    'stock_quantity' => '',
+                    'stock_status' => '',
+                ],
+                'page_rules' => [],
+            ],
+        ]);
+
+        Schema::create('scrapers', function (Blueprint $table) use ($default) {
             $table->id('scraper_id');
             $table->foreignId('store_id')->constrained('stores', 'store_id');
             $table->string('scraper_name');
             $table->string('scraper_url');
-            $table->json('scraper_config');
+            $table->json('scraper_config')->default($default);
             $table->tinyInteger('is_running')->default(0);
             $table->tinyInteger('is_active')->default(0);
             $table->timestamp('last_run')->nullable();

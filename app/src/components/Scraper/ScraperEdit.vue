@@ -1,39 +1,43 @@
 <template>
-  <q-card square flat bordered>
-    <q-card-section
-      class="q-pa-none absolute-top bg-grey-3"
-      :class="{ 'bg-grey-10': $q.dark.isActive }"
-      style="z-index: 1; height: 48px"
-    >
-      <div class="full-height q-px-md row justify-between items-center">
-        <q-chip dense label="New" icon="add" color="primary" />
-        <q-btn dense size="sm" flat icon="close" color="negative" @click="emit('hide')" />
-      </div>
-    </q-card-section>
-
-    <q-card-section class="overflow-auto" style="height: calc(100% - 96px); margin-block: 48px">
-      <div>{{ scraper.$id }}</div>
-    </q-card-section>
-
-    <q-card-section
-      class="q-pa-none absolute-bottom bg-grey-3"
-      :class="{ 'bg-grey-10': $q.dark.isActive }"
-      style="z-index: 1; height: 48px"
-    >
-      <div class="full-height q-px-md row justify-between items-center">Action</div>
-    </q-card-section>
-  </q-card>
+  <q-tr>
+    <q-td>
+      <q-chip :label="scraperRef.scraper_id" color="primary" size="sm" />
+    </q-td>
+    <q-td>
+      {{ scraperRef.scraper_name }}
+    </q-td>
+    <q-td>
+      {{ scraperRef.scraper_url }}
+    </q-td>
+    <q-td></q-td>
+    <q-td></q-td>
+    <q-td></q-td>
+    <q-td auto-width>
+      <TableAction :loading="scraperRef.$loading">
+        <q-item clickable v-close-popup @click="emit('preview', scraperRef.scraper_id, scraperRef)">
+          <q-item-section>Preview</q-item-section>
+        </q-item>
+        <q-item clickable v-close-popup @click="emit('delete', scraperRef.scraper_id, scraperRef)">
+          <q-item-section>Delete</q-item-section>
+        </q-item>
+      </TableAction>
+    </q-td>
+  </q-tr>
 </template>
 
 <script setup lang="ts">
 import { type Scraper } from 'src/stores/scraper';
+import { toRef } from 'vue';
+import TableAction from 'components/UI/TableAction.vue';
 
 const emit = defineEmits<{
-  hide: [];
+  delete: [id: number, scraper: Scraper];
+  preview: [id: number, scraper: Scraper];
 }>();
 
-defineProps<{
-  storeId: number;
+const props = defineProps<{
   scraper: Scraper;
 }>();
+
+const scraperRef = toRef(props.scraper);
 </script>

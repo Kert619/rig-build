@@ -1,15 +1,17 @@
 <template>
-  <div class="column" v-if="current && !storeStore.refresh && !loading">
+  <div v-if="loading" class="text-caption">Loading....</div>
+
+  <div class="column" v-else-if="current && !storeStore.refresh">
     <AppEdit
       :store="current"
       :error="storeStore.currentErrors.get(current.store_id)"
       @save="handleUpdate"
-      @delete="handleDelete"
+      @delete="handleDeleteStore"
     />
 
     <q-table
       :columns="columns"
-      :rows="[]"
+      :rows="scrapers"
       row-key="scraper_id"
       flat
       bordered
@@ -26,7 +28,7 @@
             label="Add Scraper"
             unelevated
             icon="add"
-            @click="scraperStore.create()"
+            @click="scraperStore.create({ store_id: current.store_id } as Scraper)"
           />
         </div>
       </template>
@@ -41,18 +43,25 @@
           :error="scraperStore.createdErrors.get(create.$id?.toString()!)"
         />
       </template>
+
+      <template #body="props">
+        <ScraperEdit
+          :scraper="props.row"
+          :key="props.row.scraper_id"
+          @delete="(id: number, scraper: Scraper) => handleDeleteScraper(id, true, scraper)"
+          @preview="handleScraperPreview"
+        />
+      </template>
     </q-table>
 
-    <!-- <q-dialog v-model="dialogOpen" full-width full-height square persistent>
-      <ScraperEdit
-        :store-id="current.store_id"
-        :scraper="create"
-        @hide="handlehide"
+    <q-dialog v-model="dialogOpen" full-width full-height square persistent>
+      <ScraperDialog
+        v-if="scraperPreview"
+        :scraper="scraperPreview"
+        @hide="handleScraperDialogHide"
       />
-    </q-dialog> -->
+    </q-dialog>
   </div>
-
-  <div v-else-if="loading" class="text-caption">Loading....</div>
 </template>
 
 <script setup lang="ts">
@@ -61,8 +70,10 @@ import { computed, nextTick, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AppEdit from 'components/Stores/AppEdit.vue';
 import { type QTableColumn, useQuasar } from 'quasar';
-import { useScraperStore } from 'src/stores/scraper';
+import { type Scraper, useScraperStore } from 'src/stores/scraper';
 import ScraperCreate from 'components/Scraper/ScraperCreate.vue';
+import ScraperEdit from 'components/Scraper/ScraperEdit.vue';
+import ScraperDialog from 'components/Scraper/ScraperDialog.vue';
 
 const $q = useQuasar();
 const route = useRoute();
@@ -70,6 +81,8 @@ const router = useRouter();
 const storeStore = useStoreStore();
 const scraperStore = useScraperStore();
 const loading = ref(false);
+const dialogOpen = ref(false);
+let scraperPreview: Scraper | null;
 
 const columns: QTableColumn[] = [
   {
@@ -123,6 +136,7 @@ const columns: QTableColumn[] = [
 
 onUnmounted(() => {
   removeCurrent();
+  delete scraperStore.filter.store_id;
 });
 
 const current = computed(() => {
@@ -133,11 +147,23 @@ const current = computed(() => {
 
 const createdScrapers = computed(() => Array.from(scraperStore.created.values()));
 
+const scrapers = computed(() => scraperStore.index);
+
 const loadStore = async () => {
   if (!route.params.id) return;
+  await storeStore.show(+route.params.id);
+};
+
+const fetchScrapers = async () => {
+  if (!route.params.id) return;
+  scraperStore.filter.store_id = route.params.id as string;
+  await scraperStore.fetchIndex();
+};
+
+const loadData = async () => {
   try {
     loading.value = true;
-    await storeStore.show(+route.params.id);
+    await Promise.all([loadStore(), fetchScrapers()]);
   } finally {
     loading.value = false;
   }
@@ -154,7 +180,7 @@ const handleUpdate = async (id: number) => {
   await handleRefresh();
 };
 
-const handleDelete = (id: number) => {
+const handleDeleteStore = (id: number) => {
   $q.dialog({
     title: 'Confirm',
     message: 'Do you want to remove this store?',
@@ -168,13 +194,40 @@ const handleDelete = (id: number) => {
   });
 };
 
-const handleDeleteScraper = (id: string) => {
-  scraperStore.created.delete(id);
-  scraperStore.createdErrors.delete(id);
+const handleDeleteScraper = (id: string | number, edit = false, scraper: Scraper | null = null) => {
+  if (edit) {
+    $q.dialog({
+      title: 'Confirm',
+      message: 'Do you want to remove this scraper?',
+      cancel: true,
+    }).onOk(() => {
+      void (async () => {
+        if (!scraper) return;
+        scraperStore.current.set(id as number, scraper);
+        await scraperStore.destroy(id as number);
+        await loadData();
+        await handleRefresh();
+      })();
+    });
+  } else {
+    scraperStore.created.delete(id as string);
+    scraperStore.createdErrors.delete(id as string);
+  }
 };
 
 const handleSaveScraper = async (id: string) => {
   await scraperStore.store(id);
+  await loadData();
+};
+
+const handleScraperPreview = (_id: number, scraper: Scraper) => {
+  scraperPreview = scraper;
+  dialogOpen.value = true;
+};
+
+const handleScraperDialogHide = () => {
+  scraperPreview = null;
+  dialogOpen.value = false;
 };
 
 const handleRefresh = async () => {
@@ -188,7 +241,7 @@ watch(
   async (id) => {
     if (id) {
       removeCurrent();
-      await loadStore();
+      await loadData();
     }
   },
   { immediate: true },

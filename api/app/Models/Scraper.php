@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Scraper extends Model
 {
     protected $primaryKey = 'scraper_id';
-    protected $fillable = ['scraper_name', 'scraper_url', 'scraper_config', 'is_running', 'is_active', 'last_run'];
+    protected $fillable = ['scraper_name', 'store_id', 'scraper_url', 'scraper_config', 'is_running', 'is_active', 'last_run'];
 
     public function store(): BelongsTo
     {
@@ -20,6 +20,7 @@ class Scraper extends Model
         return [
             'is_running' => 'boolean',
             'is_active' => 'boolean',
+            'scraper_config' => 'array'
         ];
     }
 }

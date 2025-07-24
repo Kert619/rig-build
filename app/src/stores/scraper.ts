@@ -6,6 +6,7 @@ import { ref, type Ref } from 'vue';
 
 export type Scraper = {
   $id?: string;
+  scraper_id: number;
   store_id: number;
   scraper_name: string;
   scraper_url: string;
@@ -21,20 +22,28 @@ export type ScraperConfig = {
   product: ScraperConfigProduct;
 };
 
+export type ExtractMethod = 'regex' | 'selector';
+
 type ScraperConfigCategory = {
   container_regex: string;
   regex: string;
 };
 
 type ScraperConfigProduct = {
+  method: ExtractMethod;
   container_regex: string | null;
   container_selector: string | null;
   regex: string | null;
   selector: string | null;
   format: ScraperConfigProductFormat;
-  page_rules: string[];
+  page_rules: PageRule[];
   pagination: ScraperConfigProductPagination;
-  ajax: ScraperConfigProductAjax | null;
+  ajax: ScraperConfigProductAjax;
+};
+
+type PageRule = {
+  id: string;
+  value: string;
 };
 
 type ScraperConfigProductFormat = {
@@ -64,11 +73,38 @@ type ScraperConfigProductAjax = {
 export type ScraperError = {
   scraper_name?: string;
   scraper_url?: string;
+  scraper_config?: ScraperConfig;
+};
+
+type Filter = {
+  store_id?: string;
 };
 
 export const useScraperStore = defineStore('scraper', () => {
+  const filter: Ref<Filter> = ref({});
+  const index: Ref<Scraper[]> = ref([]);
   const created: Ref<Map<string, Scraper>> = ref(new Map());
+  const current: Ref<Map<number, Scraper>> = ref(new Map());
   const createdErrors: Ref<Map<string, ScraperError>> = ref(new Map());
+  const currentErrors: Ref<Map<number, ScraperError>> = ref(new Map());
+
+  const fetchIndex = async () => {
+    try {
+      const params = new URLSearchParams();
+
+      Object.entries(filter.value).forEach(([key, value]) => {
+        if (value) {
+          params.append(key, value);
+        }
+      });
+      const response = await api.get(`/scrapers?${params.toString()}`);
+      index.value = response.data;
+    } catch (error) {
+      useApiError(error);
+
+      throw error;
+    }
+  };
 
   const create = (prefill: Scraper = <Scraper>{}) => {
     const id = uid();
@@ -101,5 +137,111 @@ export const useScraperStore = defineStore('scraper', () => {
     }
   };
 
-  return { created, createdErrors, create, store };
+  const update = async (id: number) => {
+    const scraper = current.value.get(id)!;
+    try {
+      const scraperConfig = scraper.scraper_config;
+      if (scraperConfig.product.method == 'regex') {
+        scraperConfig.product.container_selector = '';
+        scraperConfig.product.selector = '';
+      } else {
+        scraperConfig.product.container_regex = '';
+        scraperConfig.product.regex = '';
+      }
+
+      currentErrors.value.delete(id);
+      scraper.$loading = true;
+      await api.put(`/scrapers/${id}`, {
+        scraper_name: scraper.scraper_name,
+        scraper_url: scraper.scraper_url,
+        scraper_config: scraperConfig,
+      });
+      current.value.delete(id);
+      Notify.create({
+        message: 'Scraper updated',
+        type: 'positive',
+      });
+    } catch (error) {
+      const errors = useApiError(error);
+      if (errors) {
+        const err: ScraperError = {
+          scraper_name: '',
+          scraper_url: '',
+          scraper_config: {
+            category: { container_regex: '', regex: '' },
+            product: {
+              container_regex: '',
+              container_selector: '',
+              regex: '',
+              selector: '',
+              ajax: { api_base_url: '', product_link_base_url: '' },
+              pagination: {
+                base_pagination_link: '',
+                container_regex: '',
+                page_query: '',
+                pages_regex: '',
+              },
+            } as ScraperConfigProduct,
+          },
+        };
+
+        Object.entries(errors).forEach(([key, value]) => {
+          const keys = key.split('.');
+
+          let current: Record<string, unknown> = err;
+
+          for (let i = 0; i < keys.length - 1; i++) {
+            const key = keys[i]!;
+
+            current = current[key] as Record<string, unknown>;
+          }
+
+          // Assign the value to the last key
+          const lastKey = keys[keys.length - 1]!;
+          const val = value as [];
+          current[lastKey] = val.toString().replaceAll('.', ' ');
+        });
+
+        currentErrors.value.set(id, err);
+      }
+
+      throw error;
+    } finally {
+      scraper.$loading = false;
+    }
+  };
+
+  const destroy = async (id: number) => {
+    const scraper = current.value.get(id)!;
+
+    try {
+      scraper.$loading = true;
+      await api.delete(`/scrapers/${id}`);
+      current.value.delete(id);
+      Notify.create({
+        message: 'Scraper is removed',
+        type: 'positive',
+      });
+    } catch (error) {
+      useApiError(error);
+
+      throw error;
+    } finally {
+      scraper.$loading = false;
+    }
+  };
+
+  return {
+    filter,
+    index,
+    created,
+    createdErrors,
+    current,
+    currentErrors,
+    fetchIndex,
+    create,
+    store,
+    update,
+    destroy,
+  };
 });

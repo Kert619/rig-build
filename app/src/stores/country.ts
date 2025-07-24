@@ -83,6 +83,7 @@ export const useCountryStore = defineStore('country', () => {
       currentErrors.value.delete(id);
       country.$loading = true;
       await api.put(`/countries/${id}`, country);
+      current.value.delete(id);
       Notify.create({
         message: 'Country updated',
         type: 'positive',
@@ -97,7 +98,6 @@ export const useCountryStore = defineStore('country', () => {
 
       throw error;
     } finally {
-      current.value.delete(id);
       country.$loading = false;
     }
   };
@@ -108,6 +108,7 @@ export const useCountryStore = defineStore('country', () => {
     try {
       country.$loading = true;
       await api.delete(`/countries/${id}`);
+      current.value.delete(id);
       Notify.create({
         message: 'Country is removed',
         type: 'positive',
@@ -119,7 +120,6 @@ export const useCountryStore = defineStore('country', () => {
 
       throw error;
     } finally {
-      current.value.delete(id);
       country.$loading = false;
     }
   };

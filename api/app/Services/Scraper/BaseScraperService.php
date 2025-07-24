@@ -16,6 +16,7 @@ abstract class BaseScraperService implements ScraperInterface
             'regex' => '%<a\shref="(/collections/all)"[^>]*?>([^<]+).*?</a>%usi',
         ],
         'product' => [
+            'method' => '',
             'regex' => '%product-item(?=\s)[^>]*?>.*?</form>%usi',
             'selector' => '',
             'format' => [
