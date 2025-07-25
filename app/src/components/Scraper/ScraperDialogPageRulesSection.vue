@@ -9,7 +9,6 @@
       icon="add"
       @click="addPageRule"
     />
-
     <template v-if="scraperRef.scraper_config.product.page_rules.length">
       <TextInput
         v-for="rule in scraperRef.scraper_config.product.page_rules"
@@ -30,17 +29,28 @@
     </template>
 
     <div v-else class="text-caption q-mt-md">No page rules added...</div>
+
+    <div
+      v-if="
+        !!error?.scraper_config?.product.page_rules &&
+        typeof error?.scraper_config?.product.page_rules == 'string'
+      "
+      class="text-caption q-mt-md text-negative"
+    >
+      {{ error?.scraper_config?.product.page_rules }}
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { type Scraper } from 'src/stores/scraper';
+import { type ScraperError, type Scraper } from 'src/stores/scraper';
 import { toRef } from 'vue';
 import TextInput from 'components/UI/TextInput.vue';
 import { uid } from 'quasar';
 
 const props = defineProps<{
   scraper: Scraper;
+  error?: ScraperError | undefined;
 }>();
 
 const scraperRef = toRef(props.scraper);

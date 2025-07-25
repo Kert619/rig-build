@@ -1,4 +1,20 @@
 <template>
+  <div class="q-my-sm">
+    <q-btn-toggle
+      unelevated
+      size="sm"
+      dense
+      glossy
+      v-model="scraperRef.scraper_config.settings"
+      toggle-color="primary"
+      :options="[
+        { label: 'Puppeteer', value: 'puppeteer' },
+        { label: 'Ajax', value: 'ajax' },
+        { label: 'Curl', value: 'curl' },
+      ]"
+    />
+  </div>
+
   <TextInput
     v-model="scraperRef.scraper_url"
     label="Store Scraper URL"

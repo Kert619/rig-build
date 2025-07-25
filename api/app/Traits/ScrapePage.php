@@ -5,7 +5,6 @@ namespace App\Traits;
 use App\Exceptions\InvalidRegexException;
 use App\Exceptions\ScraperFetchPageException;
 use App\Utils\ScraperUtils;
-use Illuminate\Support\Facades\Log;
 
 trait ScrapePage
 {

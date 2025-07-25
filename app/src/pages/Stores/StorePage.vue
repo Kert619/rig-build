@@ -50,6 +50,7 @@
           :key="props.row.scraper_id"
           @delete="(id: number, scraper: Scraper) => handleDeleteScraper(id, true, scraper)"
           @preview="handleScraperPreview"
+          @active="handleActive"
         />
       </template>
     </q-table>
@@ -59,6 +60,7 @@
         v-if="scraperPreview"
         :scraper="scraperPreview"
         @hide="handleScraperDialogHide"
+        @run="loadData"
       />
     </q-dialog>
   </div>
@@ -228,6 +230,10 @@ const handleScraperPreview = (_id: number, scraper: Scraper) => {
 const handleScraperDialogHide = () => {
   scraperPreview = null;
   dialogOpen.value = false;
+};
+
+const handleActive = async (id: number) => {
+  await scraperStore.setActive(id);
 };
 
 const handleRefresh = async () => {

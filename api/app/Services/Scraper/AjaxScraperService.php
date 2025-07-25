@@ -2,39 +2,39 @@
 
 namespace App\Services\Scraper;
 
+use App\Models\Scraper;
 use App\Utils\TsvGenerator;
-use Illuminate\Support\Facades\Log;
 
 class AjaxScraperService extends BaseScraperService
 {
     private CategoryService $categoryService;
     private ProductService $productService;
+    private Scraper $scraper;
 
-    public function __construct(string $baseUrl)
+    public function __construct(Scraper $scraper)
     {
-        parent::__construct($baseUrl);
+        parent::__construct($scraper->scraper_url);
         $this->categoryService = app()->make(CategoryService::class, [
-            'baseUrl' => $baseUrl,
-            'scraperConfig' => $this->scraperConfig
+            'baseUrl' => $scraper->scraper_url,
+            'scraperConfig' => $scraper->scraper_config
         ]);
         $this->productService = app()->make(ProductService::class, [
-            'baseUrl' => $baseUrl,
-            'scraperConfig' => $this->scraperConfig
+            'baseUrl' => $scraper->scraper_url,
+            'scraperConfig' => $scraper->scraper_config
         ]);
+
+        $this->scraper = $scraper;
     }
 
-    public function scrape(string $url)
+
+    public function scrape()
     {
-        $start = microtime(true);
-        $html = $this->fetchSingle($url);
+        $html = $this->fetchSingle($this->scraper->scraper_url);
         $categories = $this->categoryService->getCategoryLinks($html);
         $apiResponseGenerator = $this->categoryService->fetchCategoryPagesAjax($categories['category_links']);
         $products = $this->productService->getProductsAjax($apiResponseGenerator);
         gc_collect_cycles();
-        $end = microtime(true);
-        Log::info($end - $start);
-        Log::info($products);
 
-        TsvGenerator::generate($products, $this->scraperConfig['scraper_name']);
+        TsvGenerator::generate($products, $this->scraper->scraper_name);
     }
 }

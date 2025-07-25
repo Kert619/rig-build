@@ -36,7 +36,10 @@
 
           <div>
             <q-chip label="Product" size="sm" color="primary" />
-            <ScraperDialogProductSection :scraper="scraperRef" />
+            <ScraperDialogProductSection
+              :scraper="scraperRef"
+              :error="scraperStore.currentErrors.get(scraperRef.scraper_id)"
+            />
           </div>
 
           <div>
@@ -51,13 +54,19 @@
         </div>
         <div class="col-5 border q-pa-md">
           <q-chip label="Page Rules" size="sm" color="primary" />
-          <ScraperDialogPageRulesSection :scraper="scraperRef" />
+          <ScraperDialogPageRulesSection
+            :scraper="scraperRef"
+            :error="scraperStore.currentErrors.get(scraperRef.scraper_id)"
+          />
         </div>
         <div class="col-2 border q-pa-md column q-gutter-y-md">
           <q-chip label="Format" size="sm" color="primary" class="self-start" icon-right="info">
             <q-tooltip>Format Example: "1,1" (Except for Currency)</q-tooltip>
           </q-chip>
-          <ScraperDialogFormatSection :scraper="scraperRef" />
+          <ScraperDialogFormatSection
+            :scraper="scraperRef"
+            :error="scraperStore.currentErrors.get(scraperRef.scraper_id)"
+          />
         </div>
       </div>
     </q-card-section>
@@ -67,8 +76,18 @@
       :class="{ 'bg-grey-10': $q.dark.isActive }"
       style="z-index: 1; height: 48px"
     >
-      <div class="full-height q-px-md row justify-between items-center">
+      <div class="full-height q-px-md row justify-between items-center q-gutter-x-md">
         <q-space />
+        <q-btn
+          dense
+          size="sm"
+          unelevated
+          color="negative"
+          label="Run Scraper"
+          icon="directions_run"
+          :loading="scraperStore.current.get(scraperRef.scraper_id)?.$loading"
+          @click="runScraper"
+        />
         <q-btn
           dense
           size="sm"
@@ -98,7 +117,7 @@ import { useQuasar } from 'quasar';
 
 const emit = defineEmits<{
   hide: [];
-  update: [];
+  run: [];
 }>();
 
 const props = defineProps<{
@@ -124,6 +143,19 @@ const handleSave = () => {
       scraperStore.current.set(scraperRef.value.scraper_id, scraperRef.value);
       await scraperStore.update(scraperRef.value.scraper_id);
       original.value = JSON.parse(JSON.stringify(scraperRef.value));
+    })();
+  });
+};
+
+const runScraper = () => {
+  $q.dialog({
+    title: 'Confirm',
+    message: 'Do you want to run this scraper?',
+    cancel: true,
+  }).onOk(() => {
+    void (async () => {
+      await scraperStore.scrape(scraperRef.value.scraper_id);
+      emit('run');
     })();
   });
 };

@@ -2,8 +2,8 @@
   <TextInput
     label="Currency"
     v-model="scraperRef.scraper_config.product.format.currency"
-    lazy-rules
-    :rules="[(val: string) => !!val || 'Currency is required']"
+    :error="!!error?.scraper_config?.product.format.currency"
+    :error-message="error?.scraper_config?.product.format.currency.toString()"
   />
   <TextInput
     label="Price Store Ident"
@@ -22,12 +22,13 @@
 </template>
 
 <script setup lang="ts">
-import { type Scraper } from 'src/stores/scraper';
+import { type ScraperError, type Scraper } from 'src/stores/scraper';
 import { toRef } from 'vue';
 import TextInput from 'components/UI/TextInput.vue';
 
 const props = defineProps<{
   scraper: Scraper;
+  error?: ScraperError | undefined;
 }>();
 
 const scraperRef = toRef(props.scraper);

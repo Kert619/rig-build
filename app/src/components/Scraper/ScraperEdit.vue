@@ -9,9 +9,39 @@
     <q-td>
       {{ scraperRef.scraper_url }}
     </q-td>
-    <q-td></q-td>
-    <q-td></q-td>
-    <q-td></q-td>
+    <q-td>
+      <q-btn-toggle
+        unelevated
+        size="sm"
+        dense
+        glossy
+        :model-value="scraperRef.is_running"
+        toggle-color="primary"
+        :options="[
+          { label: 'Yes', value: true },
+          { label: 'No', value: false },
+        ]"
+        disable
+      />
+    </q-td>
+    <q-td>
+      <q-btn-toggle
+        unelevated
+        size="sm"
+        dense
+        glossy
+        v-model="scraperRef.is_active"
+        toggle-color="primary"
+        :options="[
+          { label: 'Yes', value: true },
+          { label: 'No', value: false },
+        ]"
+        @update:model-value="emit('active', scraperRef.scraper_id)"
+      />
+    </q-td>
+    <q-td>
+      <span class="text-caption">{{ scraperRef.last_run ? scraperRef.last_run : 'N/A' }}</span>
+    </q-td>
     <q-td auto-width>
       <TableAction :loading="scraperRef.$loading">
         <q-item clickable v-close-popup @click="emit('preview', scraperRef.scraper_id, scraperRef)">
@@ -33,6 +63,7 @@ import TableAction from 'components/UI/TableAction.vue';
 const emit = defineEmits<{
   delete: [id: number, scraper: Scraper];
   preview: [id: number, scraper: Scraper];
+  active: [id: number];
 }>();
 
 const props = defineProps<{

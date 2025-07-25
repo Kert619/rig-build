@@ -15,14 +15,24 @@
   </div>
 
   <template v-if="scraperRef.scraper_config.product.method == 'regex'">
-    <TextInput label="Container Regex" v-model="scraperRef.scraper_config.product.container_regex">
+    <TextInput
+      label="Container Regex"
+      v-model="scraperRef.scraper_config.product.container_regex"
+      :error="!!error?.scraper_config?.product.container_regex"
+      :error-message="error?.scraper_config?.product.container_regex?.toString()"
+    >
       <template #append>
         <q-icon name="info" size="xs">
           <q-tooltip>The regex for the product container</q-tooltip>
         </q-icon>
       </template>
     </TextInput>
-    <TextInput label="Regex" v-model="scraperRef.scraper_config.product.regex">
+    <TextInput
+      label="Regex"
+      v-model="scraperRef.scraper_config.product.regex"
+      :error="!!error?.scraper_config?.product.regex"
+      :error-message="error?.scraper_config?.product.regex?.toString()"
+    >
       <template #append>
         <q-icon name="info" size="xs">
           <q-tooltip>The regex for the individual product item</q-tooltip>
@@ -35,6 +45,8 @@
     <TextInput
       label="Container Selector"
       v-model="scraperRef.scraper_config.product.container_selector"
+      :error="!!error?.scraper_config?.product.container_selector"
+      :error-message="error?.scraper_config?.product.container_selector?.toString()"
     >
       <template #append>
         <q-icon name="info" size="xs">
@@ -42,7 +54,12 @@
         </q-icon>
       </template>
     </TextInput>
-    <TextInput label="Selector" v-model="scraperRef.scraper_config.product.selector">
+    <TextInput
+      label="Selector"
+      v-model="scraperRef.scraper_config.product.selector"
+      :error="!!error?.scraper_config?.product.selector"
+      :error-message="error?.scraper_config?.product.selector?.toString()"
+    >
       <template #append>
         <q-icon name="info" size="xs">
           <q-tooltip>The selector for the individual product item</q-tooltip>
@@ -53,12 +70,13 @@
 </template>
 
 <script setup lang="ts">
-import { type Scraper } from 'src/stores/scraper';
+import { type ScraperError, type Scraper } from 'src/stores/scraper';
 import { toRef } from 'vue';
 import TextInput from 'components/UI/TextInput.vue';
 
 const props = defineProps<{
   scraper: Scraper;
+  error?: ScraperError | undefined;
 }>();
 
 const scraperRef = toRef(props.scraper);

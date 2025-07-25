@@ -17,5 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('stores/options', [StoreController::class, 'options']);
     Route::apiResource('stores', StoreController::class);
 
+    Route::post('scrapers/scrape/{scraperId}', [ScraperController::class, 'scrape']);
+    Route::post('scrapers/set-active/{scraper}', [ScraperController::class, 'setActive']);
     Route::apiResource('scrapers', ScraperController::class);
 });

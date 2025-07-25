@@ -2,30 +2,35 @@
 
 namespace App\Services\Scraper;
 
+use App\Models\Scraper;
 use Illuminate\Support\Facades\Log;
 
 class CurlScraperService extends BaseScraperService
 {
     private CategoryService $categoryService;
     private ProductService $productService;
+    private Scraper $scraper;
 
-    public function __construct(string $baseUrl)
+    public function __construct(Scraper $scraper)
     {
-        parent::__construct($baseUrl);
+        parent::__construct($scraper->scraper_url);
         $this->categoryService = app()->make(CategoryService::class, [
-            'baseUrl' => $baseUrl,
-            'scraperConfig' => $this->scraperConfig
+            'baseUrl' => $scraper->scraper_url,
+            'scraperConfig' => $scraper->scraper_config
         ]);
         $this->productService = app()->make(ProductService::class, [
-            'baseUrl' => $baseUrl,
-            'scraperConfig' => $this->scraperConfig
+            'baseUrl' => $scraper->scraper_url,
+            'scraperConfig' => $scraper->scraper_config
         ]);
+
+        $this->scraper = $scraper;
     }
 
-    public function scrape(string $url)
+
+    public function scrape()
     {
         $start = microtime(true);
-        $html = $this->fetchCurl($url, $this->baseUrl);
+        $html = $this->fetchCurl($this->scraper->scraper_url, $this->baseUrl);
         $categories = $this->categoryService->getCategoryLinks($html);
         $end = microtime(true);
         Log::info($end - $start);

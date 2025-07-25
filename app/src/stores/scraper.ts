@@ -18,11 +18,14 @@ export type Scraper = {
 };
 
 export type ScraperConfig = {
+  settings: ScraperSettings;
   category: ScraperConfigCategory;
   product: ScraperConfigProduct;
 };
 
 export type ExtractMethod = 'regex' | 'selector';
+
+export type ScraperSettings = 'puppeteer' | 'ajax' | 'curl';
 
 type ScraperConfigCategory = {
   container_regex: string;
@@ -164,45 +167,7 @@ export const useScraperStore = defineStore('scraper', () => {
     } catch (error) {
       const errors = useApiError(error);
       if (errors) {
-        const err: ScraperError = {
-          scraper_name: '',
-          scraper_url: '',
-          scraper_config: {
-            category: { container_regex: '', regex: '' },
-            product: {
-              container_regex: '',
-              container_selector: '',
-              regex: '',
-              selector: '',
-              ajax: { api_base_url: '', product_link_base_url: '' },
-              pagination: {
-                base_pagination_link: '',
-                container_regex: '',
-                page_query: '',
-                pages_regex: '',
-              },
-            } as ScraperConfigProduct,
-          },
-        };
-
-        Object.entries(errors).forEach(([key, value]) => {
-          const keys = key.split('.');
-
-          let current: Record<string, unknown> = err;
-
-          for (let i = 0; i < keys.length - 1; i++) {
-            const key = keys[i]!;
-
-            current = current[key] as Record<string, unknown>;
-          }
-
-          // Assign the value to the last key
-          const lastKey = keys[keys.length - 1]!;
-          const val = value as [];
-          current[lastKey] = val.toString().replaceAll('.', ' ');
-        });
-
-        currentErrors.value.set(id, err);
+        normalizeScraperUpdateError(errors, id);
       }
 
       throw error;
@@ -231,6 +196,88 @@ export const useScraperStore = defineStore('scraper', () => {
     }
   };
 
+  const scrape = async (id: number) => {
+    try {
+      const response = await api.post(`scrapers/scrape/${id}`);
+      Notify.create({
+        message: response.data.message,
+        type: 'positive',
+      });
+    } catch (error) {
+      useApiError(error);
+
+      throw error;
+    }
+  };
+
+  const setActive = async (id: number) => {
+    try {
+      const response = await api.post(`scrapers/set-active/${id}`);
+      Notify.create({
+        message: response.data.message,
+        type: 'positive',
+      });
+    } catch (error) {
+      useApiError(error);
+
+      throw error;
+    }
+  };
+
+  const normalizeScraperUpdateError = (errors: object, id: number) => {
+    const err: ScraperError = {
+      scraper_name: '',
+      scraper_url: '',
+      scraper_config: {
+        settings: 'puppeteer',
+        category: { container_regex: '', regex: '' },
+        product: {
+          container_regex: '',
+          container_selector: '',
+          regex: '',
+          selector: '',
+          ajax: { api_base_url: '', product_link_base_url: '' },
+          pagination: {
+            base_pagination_link: '',
+            container_regex: '',
+            page_query: '',
+            pages_regex: '',
+          },
+          format: {
+            currency: '',
+            img_url: '',
+            price: '',
+            price_name: '',
+            price_store_ident: '',
+            price_url: '',
+            rating: '',
+            stock_quantity: '',
+            stock_status: '',
+          },
+        } as ScraperConfigProduct,
+      },
+    };
+
+    Object.entries(errors).forEach(([key, value]) => {
+      const keys = key.split('.');
+
+      let current: Record<string, unknown> = err;
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        const key = keys[i]!;
+
+        current = current[key] as Record<string, unknown>;
+      }
+
+      // Assign the value to the last key
+      const lastKey = keys[keys.length - 1]!;
+      const val = value as [];
+      current[lastKey] = val.toString().replaceAll('.', ' ');
+    });
+
+    currentErrors.value.set(id, err);
+  };
+
   return {
     filter,
     index,
@@ -243,5 +290,7 @@ export const useScraperStore = defineStore('scraper', () => {
     store,
     update,
     destroy,
+    scrape,
+    setActive,
   };
 });

@@ -3,6 +3,7 @@
 namespace App\Factories;
 
 use App\Contracts\ScraperInterface;
+use App\Models\Scraper;
 use App\Services\Scraper\AjaxScraperService;
 use App\Services\Scraper\CurlScraperService;
 use App\Services\Scraper\PuppeteerScraperService;
@@ -10,12 +11,14 @@ use InvalidArgumentException;
 
 class ScraperFactory
 {
-    public static function make(string $baseUrl, string $type = 'puppeteer'): ScraperInterface
+    public static function make(int $scraperId): ScraperInterface
     {
-        return match ($type) {
-            'puppeteer' => new PuppeteerScraperService($baseUrl),
-            'ajax' => new AjaxScraperService($baseUrl),
-            'curl' => new CurlScraperService($baseUrl),
+        $scraper = Scraper::query()->findOrFail($scraperId);
+
+        return match ($scraper->scraper_config['settings']) {
+            'puppeteer' => new PuppeteerScraperService($scraper),
+            'ajax' => new AjaxScraperService($scraper),
+            'curl' => new CurlScraperService($scraper),
             default => throw new InvalidArgumentException('Invalid scraper type')
         };
     }

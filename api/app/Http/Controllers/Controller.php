@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 abstract class Controller
 {
@@ -88,7 +89,6 @@ abstract class Controller
     public function update($id, Request $request): JsonResponse
     {
         $validated = $request->validate($this->updateRules($id), $this->messages(), $this->fieldNames());
-
         $row = $this->model::findOrFail($id);
 
         $row->update($validated);

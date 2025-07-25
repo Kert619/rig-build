@@ -6,7 +6,6 @@ use App\Exceptions\ScraperCategoryContainerNotFoundException;
 use App\Exceptions\ScraperCategoryLinksNotFoundException;
 use App\Traits\ScrapePage;
 use App\Utils\ScraperUtils;
-use Illuminate\Support\Facades\Log;
 
 class CategoryService
 {
@@ -46,26 +45,17 @@ class CategoryService
 
     public function fetchCategoryPages(array $categoryLinks)
     {
-        $categoryLinksChunk = array_chunk($categoryLinks, 10);
-
-        foreach ($categoryLinksChunk as $chunk) {
-            $result = $this->fetchMulti($chunk);
-            foreach ($result->results as $categoryHtml) {
-                yield $categoryHtml;
-            }
-
-            foreach ($result->errors as $error) {
-                Log::info((array) $error);
-            }
+        foreach ($categoryLinks as $categoryLink) {
+            yield $categoryLink => $this->fetchSingle($categoryLink);
         }
     }
 
     public function fetchCategoryPagesAjax(array $categoryLinks)
     {
         foreach ($categoryLinks as $categoryLink) {
-            $api = $this->fetchAjax($categoryLink, $this->scraperConfig['product']['ajax']['api_base_url']);
-            $response = $this->fetchCurl($api, $this->baseUrl);
-            yield $api => $response;
+            $apiUrl = $this->fetchAjax($categoryLink, $this->scraperConfig['product']['ajax']['api_base_url']);
+            $response = $this->fetchCurl($apiUrl, $this->baseUrl);
+            yield $apiUrl => $response;
             sleep(rand(1, 3));
         }
     }

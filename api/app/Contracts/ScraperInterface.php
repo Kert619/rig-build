@@ -4,5 +4,5 @@ namespace App\Contracts;
 
 interface ScraperInterface
 {
-    public function scrape(string $url);
+    public function scrape();
 }

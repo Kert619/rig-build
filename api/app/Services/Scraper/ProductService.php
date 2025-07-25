@@ -26,10 +26,11 @@ class ProductService
     {
         $products = [];
 
-        foreach ($categoriesHtml as $categoryHtml) {
+        foreach ($categoriesHtml as  $categoryLink => $categoryHtml) {
             if (empty($categoryHtml)) continue;
 
-            $paginationUrls = array_chunk($this->getPaginationUrls($categoryHtml), 5);
+            $paginationUrls = array_chunk($this->getPaginationUrls($categoryHtml, $categoryLink), 5);
+
             $allPagesHtml = [$categoryHtml];
 
             // If there are pagination URLs, fetch the pages
@@ -42,7 +43,7 @@ class ProductService
                     }
 
                     foreach ($pages->errors as $error) {
-                        Log::info((array) $error);
+                        Log::error((array) $error);
                     }
                 }
             }
@@ -65,11 +66,11 @@ class ProductService
     public function getProductsAjax(Generator $apiResponses)
     {
         $products = [];
-        foreach ($apiResponses as $api => $apiResponse) {
+        foreach ($apiResponses as $apiUrl => $apiResponse) {
             if (empty($apiResponse)) continue;
 
             $paginationUrls = $this->getPaginationUrls($apiResponse);
-            $paginationUrls = $this->combineApiQueryParams($api, $paginationUrls);
+            $paginationUrls = $this->combineApiQueryParams($apiUrl, $paginationUrls);
 
             $allApiResponses = [$apiResponse];
 
@@ -197,7 +198,7 @@ class ProductService
         return ScraperUtils::cleanText($matches[$group]);
     }
 
-    private function getPaginationUrls(string $html)
+    private function getPaginationUrls(string $html, $categoryLink = '',)
     {
         if (!$this->scraperConfig['product']['pagination']['container_regex']) return [];
 
@@ -208,27 +209,35 @@ class ProductService
         $pageQuery = $this->scraperConfig['product']['pagination']['page_query'];
         $basePaginationLink = $this->scraperConfig['product']['pagination']['base_pagination_link'];
 
-        $urls = array_map(fn($page) => $basePaginationLink . '?' . $pageQuery . $page, $pageNumbers);
+        if (empty($basePaginationLink) && $categoryLink) {
+            $basePaginationLink = $categoryLink;
+        }
 
+        $urls = array_map(fn($page) => $basePaginationLink . '?' . $pageQuery . $page, $pageNumbers);
         return $urls;
     }
 
     private function getPaginationPages(string $html)
     {
-        $matches = [];
-        $this->extractHtml($html, $this->scraperConfig['product']['pagination']['pages_regex'], $matches);
+        try {
+            $matches = [];
+            $this->extractHtml($html, $this->scraperConfig['product']['pagination']['pages_regex'], $matches);
 
-        if (!isset($matches[1])) {
-            throw new InvalidPageRegexException();
+            if (!isset($matches[1])) {
+                throw new InvalidPageRegexException();
+            }
+
+            if (empty($matches[1])) return [];
+
+            $pageNumbers = array_filter($matches[1], fn($page) => is_numeric($page));
+
+            $maxPage = (int) max($pageNumbers);
+
+            return range(2, $maxPage);
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            throw $th;
         }
-
-        if (empty($matches[1])) return [];
-
-        $pageNumbers = array_filter($matches[1], fn($page) => is_numeric($page));
-
-        $maxPage = (int) max($pageNumbers);
-
-        return range(2, $maxPage);
     }
 
     private function combineApiQueryParams(string $sourceUrl, array $targetUrls)

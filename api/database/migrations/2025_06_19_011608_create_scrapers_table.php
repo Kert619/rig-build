@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         $default = json_encode([
+            'settings' => 'puppeteer',
             'category' => [
                 'container_regex' => '',
                 'regex' => '',
