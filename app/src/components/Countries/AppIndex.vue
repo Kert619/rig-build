@@ -1,68 +1,66 @@
 <template>
-  <div>
-    <q-table
-      :columns="columns"
-      :rows="countries"
-      row-key="country_code"
-      flat
-      bordered
-      dense
-      square
-      :loading="loading"
-    >
-      <template #top>
-        <div class="row items-center justify-between full-width">
-          <q-btn
-            label="Add Country"
-            icon="add"
-            color="primary"
-            dense
-            size="sm"
-            unelevated
-            glossy
-            @click="countryStore.create()"
-          />
-
-          <TextInput
-            v-model="search"
-            clearable
-            debounce="600"
-            placeholder="Search country"
-            class="full-width"
-            style="max-width: 30vw"
-          >
-            <template #prepend>
-              <q-icon name="search" />
-            </template>
-          </TextInput>
-
-          <span class="text-body2">Countries</span>
-        </div>
-      </template>
-
-      <template #top-row>
-        <AppCreate
-          v-for="create in created"
-          :key="create.$id?.toString() ?? ''"
-          :country="create"
-          :error="countryStore.createdErrors.get(create.$id?.toString()!)"
-          @delete="handleDelete"
-          @save="handleSave"
+  <q-table
+    :columns="columns"
+    :rows="countries"
+    row-key="country_code"
+    flat
+    bordered
+    dense
+    square
+    :loading="loading"
+  >
+    <template #top>
+      <div class="row items-center justify-between full-width">
+        <q-btn
+          label="Add Country"
+          icon="add"
+          color="primary"
+          dense
+          size="sm"
+          unelevated
+          glossy
+          @click="countryStore.create()"
         />
-      </template>
 
-      <template #body="props">
-        <AppEdit
-          v-if="!countryStore.refresh"
-          :country="props.row"
-          :error="countryStore.currentErrors.get(props.row.country_code)"
-          @delete="(id: string, country: Country) => handleDelete(id, true, country)"
-          @save="handleUpdated"
-          :key="props.row.country_code"
-        />
-      </template>
-    </q-table>
-  </div>
+        <TextInput
+          v-model="search"
+          clearable
+          debounce="600"
+          placeholder="Search country"
+          class="full-width"
+          style="max-width: 30vw"
+        >
+          <template #prepend>
+            <q-icon name="search" />
+          </template>
+        </TextInput>
+
+        <span class="text-body2">Countries</span>
+      </div>
+    </template>
+
+    <template #top-row>
+      <AppCreate
+        v-for="create in created"
+        :key="create.$id?.toString() ?? ''"
+        :country="create"
+        :error="countryStore.createdErrors.get(create.$id?.toString()!)"
+        @delete="handleDelete"
+        @save="handleSave"
+      />
+    </template>
+
+    <template #body="props">
+      <AppEdit
+        v-if="!countryStore.refresh"
+        :country="props.row"
+        :error="countryStore.currentErrors.get(props.row.country_code)"
+        @delete="(id: string, country: Country) => handleDelete(id, true, country)"
+        @save="handleUpdated"
+        :key="props.row.country_code"
+      />
+    </template>
+  </q-table>
 </template>
 
 <script setup lang="ts">

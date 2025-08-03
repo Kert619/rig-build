@@ -17,6 +17,18 @@ export type Scraper = {
   $loading?: boolean;
 };
 
+export type PreviewPrices = {
+  price_store_ident: string;
+  price_name: string;
+  currency: string;
+  price: number;
+  stock_status: string;
+  stock_quantity: number;
+  rating: string;
+  price_url: string;
+  img_url: string;
+};
+
 export type ScraperConfig = {
   settings: ScraperSettings;
   category: ScraperConfigCategory;
@@ -28,7 +40,9 @@ export type ExtractMethod = 'regex' | 'selector';
 export type ScraperSettings = 'puppeteer' | 'ajax' | 'curl';
 
 type ScraperConfigCategory = {
+  container_extract_method: ExtractMethod;
   container_regex: string;
+  container_selector: string;
   regex: string;
 };
 
@@ -73,6 +87,11 @@ type ScraperConfigProductAjax = {
   product_link_base_url: string;
 };
 
+export type CategoryProcessor = {
+  category_link: string;
+  category_name: string;
+};
+
 export type ScraperError = {
   scraper_name?: string;
   scraper_url?: string;
@@ -90,6 +109,8 @@ export const useScraperStore = defineStore('scraper', () => {
   const current: Ref<Map<number, Scraper>> = ref(new Map());
   const createdErrors: Ref<Map<string, ScraperError>> = ref(new Map());
   const currentErrors: Ref<Map<number, ScraperError>> = ref(new Map());
+  const previewPrices: Ref<PreviewPrices[]> = ref([]);
+  const categoryProcessor: Ref<CategoryProcessor[]> = ref([]);
 
   const fetchIndex = async () => {
     try {
@@ -152,6 +173,12 @@ export const useScraperStore = defineStore('scraper', () => {
         scraperConfig.product.regex = '';
       }
 
+      if (scraperConfig.category.container_extract_method == 'regex') {
+        scraperConfig.category.container_selector = '';
+      } else {
+        scraperConfig.category.container_regex = '';
+      }
+
       currentErrors.value.delete(id);
       scraper.$loading = true;
       await api.put(`/scrapers/${id}`, {
@@ -196,20 +223,6 @@ export const useScraperStore = defineStore('scraper', () => {
     }
   };
 
-  const scrape = async (id: number) => {
-    try {
-      const response = await api.post(`scrapers/scrape/${id}`);
-      Notify.create({
-        message: response.data.message,
-        type: 'positive',
-      });
-    } catch (error) {
-      useApiError(error);
-
-      throw error;
-    }
-  };
-
   const setActive = async (id: number) => {
     try {
       const response = await api.post(`scrapers/set-active/${id}`);
@@ -224,13 +237,39 @@ export const useScraperStore = defineStore('scraper', () => {
     }
   };
 
+  const preview = async (id: number) => {
+    try {
+      const response = await api.get(`scrapers/preview/${id}`);
+      previewPrices.value = response.data;
+    } catch (error) {
+      useApiError(error);
+
+      throw error;
+    }
+  };
+
+  const processCategories = async (id: number) => {
+    try {
+      const response = await api.post(`scrapers/process-categories/${id}`);
+      categoryProcessor.value = response.data;
+    } catch (error) {
+      useApiError(error);
+
+      throw error;
+    }
+  };
+
   const normalizeScraperUpdateError = (errors: object, id: number) => {
     const err: ScraperError = {
       scraper_name: '',
       scraper_url: '',
       scraper_config: {
         settings: 'puppeteer',
-        category: { container_regex: '', regex: '' },
+        category: {
+          container_regex: '',
+          regex: '',
+          container_selector: '',
+        } as ScraperConfigCategory,
         product: {
           container_regex: '',
           container_selector: '',
@@ -285,12 +324,15 @@ export const useScraperStore = defineStore('scraper', () => {
     createdErrors,
     current,
     currentErrors,
+    previewPrices,
+    categoryProcessor,
     fetchIndex,
     create,
     store,
     update,
     destroy,
-    scrape,
     setActive,
+    preview,
+    processCategories,
   };
 });

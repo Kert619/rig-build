@@ -13,6 +13,10 @@ const routes: RouteRecordRaw[] = [
         children: [{ path: ':id', component: () => import('pages/Stores/StorePage.vue') }],
       },
       { path: 'countries', component: () => import('pages/CountriesPage.vue') },
+      {
+        path: 'scraper-logs',
+        component: () => import('pages/ScraperLogs.vue'),
+      },
     ],
   },
   {

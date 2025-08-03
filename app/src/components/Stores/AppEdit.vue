@@ -41,7 +41,14 @@
           :error-message="error?.store_url?.toString()"
         >
           <template #append>
-            <q-btn dense size="sm" flat icon="open_in_new" @click="openLink(storeRef.store_url)" />
+            <q-btn
+              dense
+              size="sm"
+              flat
+              icon="open_in_new"
+              color="primary"
+              @click="useOpenLink(storeRef.store_url)"
+            />
           </template>
         </TextInput>
       </div>
@@ -69,6 +76,7 @@ import { type StoreError, type Store } from 'src/stores/store';
 import { toRef } from 'vue';
 import TextInput from 'components/UI/TextInput.vue';
 import SelectOptions from 'components/UI/SelectOptions.vue';
+import { useOpenLink } from 'src/composables/useOpenLink';
 
 const emit = defineEmits<{
   save: [id: number];
@@ -86,10 +94,5 @@ const storeRef = toRef(props.store);
 
 const handleSubmit = () => {
   emit('save', storeRef.value.store_id);
-};
-
-const openLink = (link: string) => {
-  if (!link.trim()) return;
-  window.open(link, '_blank');
 };
 </script>

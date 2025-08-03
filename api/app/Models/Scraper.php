@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Scraper extends Model
 {
@@ -13,6 +14,11 @@ class Scraper extends Model
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class, 'store_id', 'store_id');
+    }
+
+    public function scraperLogs(): HasMany
+    {
+        return $this->hasMany(ScraperLog::class, 'scraper_id', 'scraper_id');
     }
 
     protected function casts(): array

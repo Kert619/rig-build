@@ -29,10 +29,10 @@ class CurlScraperService extends BaseScraperService
 
     public function scrape()
     {
-        $start = microtime(true);
-        $html = $this->fetchCurl($this->scraper->scraper_url, $this->baseUrl);
-        $categories = $this->categoryService->getCategoryLinks($html);
-        $end = microtime(true);
-        Log::info($end - $start);
+        // $start = microtime(true);
+        // $html = $this->fetchCurl($this->scraper->scraper_url, $this->baseUrl);
+        // $categories = $this->categoryService->getCategoryLinks($html);
+        // $end = microtime(true);
+        // Log::info($end - $start);
     }
 }

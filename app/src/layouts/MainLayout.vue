@@ -62,6 +62,18 @@
               <q-item-label>Categories</q-item-label>
             </q-item-section>
           </q-item>
+
+          <q-expansion-item expand-separator icon="history" label="Logs" :header-inset-level="1">
+            <q-item :inset-level="2" clickable to="/scraper-logs">
+              <q-item-section avatar>
+                <q-icon name="computer" />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>Scraper Logs</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-expansion-item>
         </q-expansion-item>
 
         <q-item clickable @click="logout">

@@ -21,6 +21,17 @@
     :error="!!error?.scraper_url"
     :error-message="error?.scraper_url?.toString()"
   >
+    <template #prepend>
+      <q-btn
+        dense
+        size="sm"
+        flat
+        icon="open_in_new"
+        color="primary"
+        @click="useOpenLink(scraperRef.scraper_url)"
+      />
+    </template>
+
     <template #append>
       <q-icon name="info" size="xs">
         <q-tooltip>The base URL of the scraper</q-tooltip>
@@ -48,6 +59,7 @@
 import { type ScraperError, type Scraper } from 'src/stores/scraper';
 import { toRef } from 'vue';
 import TextInput from 'components/UI/TextInput.vue';
+import { useOpenLink } from 'src/composables/useOpenLink';
 
 const props = defineProps<{
   scraper: Scraper;

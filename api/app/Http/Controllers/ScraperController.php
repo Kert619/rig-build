@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\Scraper as JobsScraper;
+use App\Factories\ScraperFactory;
 use App\Models\Scraper;
 
 class ScraperController extends Controller
@@ -33,7 +33,9 @@ class ScraperController extends Controller
 
             'scraper_config.settings' => 'required|in:puppeteer,ajax,curl',
 
-            'scraper_config.category.container_regex' => 'required|string',
+            'scraper_config.category.container_extract_method' => 'required|in:regex,selector',
+            'scraper_config.category.container_regex' => 'required_if:scraper_config.category.container_extract_method,regex',
+            'scraper_config.category.container_selector' => 'required_if:scraper_config.category.container_extract_method,selector',
             'scraper_config.category.regex' => 'required|string',
 
             'scraper_config.product.method' => 'required|in:regex,selector',
@@ -69,7 +71,9 @@ class ScraperController extends Controller
     protected function fieldNames(): array
     {
         return [
+            'scraper_config.category.container_extract_method' => 'method',
             'scraper_config.category.container_regex' => 'category container regex',
+            'scraper_config.category.container_selector' => 'category container selector',
             'scraper_config.category.regex' => 'category regex',
             'scraper_config.product.container_regex' => 'product container regex',
             'scraper_config.product.regex' => 'product regex',
@@ -81,12 +85,6 @@ class ScraperController extends Controller
         ];
     }
 
-    public function scrape(int $scraperId)
-    {
-        JobsScraper::dispatch($scraperId);
-        return response()->json(['message' => 'Scraper started']);
-    }
-
     public function setActive(Scraper $scraper)
     {
         $scraper->update(['is_active' => !$scraper->is_active]);
@@ -94,5 +92,15 @@ class ScraperController extends Controller
         $active = $scraper->is_active ? 'active' : 'inactive';
 
         return response()->json(['message' => 'Scraper is set to ' . $active]);
+    }
+
+    public function preview(ScraperFactory $scraperFactory, int $scraperId)
+    {
+        return $scraperFactory->make($scraperId)->preview();
+    }
+
+    public function processCategories(ScraperFactory $scraperFactory, int $scraperId)
+    {
+        return $scraperFactory->make($scraperId)->processCategories();
     }
 }

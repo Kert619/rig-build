@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Factories\ScraperFactory;
 use App\Models\Scraper;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 
 class ScraperRunner extends Command
 {
@@ -28,19 +27,21 @@ class ScraperRunner extends Command
      */
     public function handle(ScraperFactory $scraperFactory)
     {
-        $this->info('Scraper is running');
+        $this->info("Scraper started");
 
         $activeScrapers = Scraper::query()->where('is_active', true)->get();
 
-        foreach ($activeScrapers as $activeScraper) {
-            try {
-                $scraperFactory->make($activeScraper->scraper_id)->scrape();
-            } catch (\Throwable $th) {
-                Log::error($th->getMessage());
-                throw $th;
-            }
+        if ($activeScrapers->isEmpty()) {
+            $this->error('There are no active scrapers');
+            return;
         }
 
-        $this->info('Scraper has finished runing');
+        foreach ($activeScrapers as $activeScraper) {
+            $activeScraper->update(['is_running' => true]);
+            $scraperFactory->make($activeScraper->scraper_id)->scrape();
+            $activeScraper->update(['is_running' => false, 'last_run' => now()]);
+        }
+
+        $this->info("Scraper finished");
     }
 }

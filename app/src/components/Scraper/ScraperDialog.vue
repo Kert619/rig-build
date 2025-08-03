@@ -6,7 +6,7 @@
       style="z-index: 1; height: 48px"
     >
       <div class="full-height q-px-md row justify-between items-center">
-        <q-chip dense :label="`Scraper ${scraperRef.scraper_id}`" color="primary" />
+        <q-chip size="sm" :label="`Scraper ${scraperRef.scraper_id}`" color="primary" />
         <div v-if="hasUnsaveChanges" class="text-negative">You have unsave changes!</div>
         <q-btn dense size="sm" flat icon="close" color="negative" @click="emit('hide')" />
       </div>
@@ -28,9 +28,10 @@
 
           <div>
             <q-chip label="Category" size="sm" color="primary" />
-            <ScraperCategorySection
+            <ScraperDialogCategorySection
               :scraper="scraperRef"
               :error="scraperStore.currentErrors.get(scraperRef.scraper_id)"
+              @process-category="emit('processCategory')"
             />
           </div>
 
@@ -82,12 +83,21 @@
           dense
           size="sm"
           unelevated
-          color="negative"
-          label="Run Scraper"
-          icon="directions_run"
-          :loading="scraperStore.current.get(scraperRef.scraper_id)?.$loading"
-          @click="runScraper"
+          label="Query Selector Debugger"
+          icon="code"
+          @click="emit('openSelectorDebug')"
         />
+
+        <q-btn
+          dense
+          size="sm"
+          unelevated
+          color="primary"
+          label="Preview Prices"
+          icon="visibility"
+          @click="emit('preview', scraperRef.scraper_id)"
+        />
+
         <q-btn
           dense
           size="sm"
@@ -107,7 +117,7 @@
 import { useScraperStore, type Scraper } from 'src/stores/scraper';
 import { computed, ref, toRef } from 'vue';
 import ScraperDialogScraperSection from 'components/Scraper/ScraperDialogScraperSection.vue';
-import ScraperCategorySection from 'components/Scraper/ScraperCategorySection.vue';
+import ScraperDialogCategorySection from 'components/Scraper/ScraperDialogCategorySection.vue';
 import ScraperDialogProductSection from 'components/Scraper/ScraperDialogProductSection.vue';
 import ScraperDialogFormatSection from 'components/Scraper/ScraperDialogFormatSection.vue';
 import ScraperDialogPageRulesSection from 'components/Scraper/ScraperDialogPageRulesSection.vue';
@@ -118,6 +128,9 @@ import { useQuasar } from 'quasar';
 const emit = defineEmits<{
   hide: [];
   run: [];
+  preview: [id: number];
+  openSelectorDebug: [];
+  processCategory: [];
 }>();
 
 const props = defineProps<{
@@ -143,19 +156,6 @@ const handleSave = () => {
       scraperStore.current.set(scraperRef.value.scraper_id, scraperRef.value);
       await scraperStore.update(scraperRef.value.scraper_id);
       original.value = JSON.parse(JSON.stringify(scraperRef.value));
-    })();
-  });
-};
-
-const runScraper = () => {
-  $q.dialog({
-    title: 'Confirm',
-    message: 'Do you want to run this scraper?',
-    cancel: true,
-  }).onOk(() => {
-    void (async () => {
-      await scraperStore.scrape(scraperRef.value.scraper_id);
-      emit('run');
     })();
   });
 };

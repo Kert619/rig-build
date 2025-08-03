@@ -7,7 +7,11 @@
         max-length="2"
         :error="!!error?.country_code"
         :error-message="error?.country_code?.toString()"
-      />
+      >
+        <template #before>
+          <q-chip label="New" icon="add" color="primary" size="sm" />
+        </template>
+      </TextInput>
     </q-td>
     <q-td>
       <TextInput

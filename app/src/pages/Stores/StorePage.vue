@@ -28,7 +28,13 @@
             label="Add Scraper"
             unelevated
             icon="add"
-            @click="scraperStore.create({ store_id: current.store_id } as Scraper)"
+            @click="
+              scraperStore.create({
+                store_id: current.store_id,
+                scraper_name: `${current.store_name} Scraper`,
+                scraper_url: current.store_url,
+              } as Scraper)
+            "
           />
         </div>
       </template>
@@ -55,14 +61,35 @@
       </template>
     </q-table>
 
-    <q-dialog v-model="dialogOpen" full-width full-height square persistent>
+    <q-dialog v-model="scraperPreviewOpen" full-width full-height square persistent>
       <ScraperDialog
         v-if="scraperPreview"
         :scraper="scraperPreview"
         @hide="handleScraperDialogHide"
         @run="loadData"
+        @preview="scraperPricesOpen = true"
+        @open-selector-debug="querySelectorDebuggerOpen = true"
+        @process-category="categoryProcessorOpen = true"
       />
     </q-dialog>
+
+    <q-dialog v-model="scraperPricesOpen" full-width full-height square persistent>
+      <ScraperPricesPreviewDialog
+        v-if="scraperPreview"
+        :scraper="scraperPreview"
+        @hide="scraperPricesOpen = false"
+      />
+    </q-dialog>
+
+    <q-dialog v-model="categoryProcessorOpen" full-width full-height square persistent>
+      <CategoryProcessorDialog
+        v-if="scraperPreview"
+        :scraper="scraperPreview"
+        @hide="categoryProcessorOpen = false"
+      />
+    </q-dialog>
+
+    <QuerySelectorDebugger v-model="querySelectorDebuggerOpen" />
   </div>
 </template>
 
@@ -76,6 +103,9 @@ import { type Scraper, useScraperStore } from 'src/stores/scraper';
 import ScraperCreate from 'components/Scraper/ScraperCreate.vue';
 import ScraperEdit from 'components/Scraper/ScraperEdit.vue';
 import ScraperDialog from 'components/Scraper/ScraperDialog.vue';
+import ScraperPricesPreviewDialog from 'components/Scraper/ScraperPricesPreviewDialog.vue';
+import QuerySelectorDebugger from 'components/Scraper/QuerySelectorDebugger.vue';
+import CategoryProcessorDialog from 'components/Scraper/CategoryProcessorDialog.vue';
 
 const $q = useQuasar();
 const route = useRoute();
@@ -83,7 +113,10 @@ const router = useRouter();
 const storeStore = useStoreStore();
 const scraperStore = useScraperStore();
 const loading = ref(false);
-const dialogOpen = ref(false);
+const scraperPreviewOpen = ref(false);
+const scraperPricesOpen = ref(false);
+const querySelectorDebuggerOpen = ref(false);
+const categoryProcessorOpen = ref(false);
 let scraperPreview: Scraper | null;
 
 const columns: QTableColumn[] = [
@@ -224,12 +257,12 @@ const handleSaveScraper = async (id: string) => {
 
 const handleScraperPreview = (_id: number, scraper: Scraper) => {
   scraperPreview = scraper;
-  dialogOpen.value = true;
+  scraperPreviewOpen.value = true;
 };
 
 const handleScraperDialogHide = () => {
   scraperPreview = null;
-  dialogOpen.value = false;
+  scraperPreviewOpen.value = false;
 };
 
 const handleActive = async (id: number) => {

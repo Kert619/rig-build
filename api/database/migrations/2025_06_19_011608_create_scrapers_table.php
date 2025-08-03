@@ -14,7 +14,9 @@ return new class extends Migration
         $default = json_encode([
             'settings' => 'puppeteer',
             'category' => [
+                'container_extract_method' => 'regex',
                 'container_regex' => '',
+                'container_selector' => '',
                 'regex' => '',
             ],
             'product' => [

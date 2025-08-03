@@ -6,6 +6,8 @@ use App\Exceptions\ScraperCategoryContainerNotFoundException;
 use App\Exceptions\ScraperCategoryLinksNotFoundException;
 use App\Traits\ScrapePage;
 use App\Utils\ScraperUtils;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\DomCrawler\Crawler;
 
 class CategoryService
 {
@@ -21,13 +23,29 @@ class CategoryService
     }
     public function getCategoryLinks(string $html)
     {
-        $categoryContainerHtml = $this->extractHtml($html, $this->scraperConfig['category']['container_regex']);
-        if (!$categoryContainerHtml) {
+        $containerRegex = $this->scraperConfig['category']['container_regex'];
+        $containerSelector = $this->scraperConfig['category']['container_selector'];
+
+        $containerHtml = '';
+        //get category container html using regex or selector
+        if ($containerRegex) {
+            $containerHtml = $this->extractHtml($html, $containerRegex);
+        } else if ($containerSelector) {
+            $crawler = new Crawler($html);
+            $category = $crawler->filter($containerSelector)->each(
+                fn(Crawler $node) =>
+                $node->getNode(0)->ownerDocument->saveHTML($node->getNode(0))
+            );
+
+            $containerHtml = implode("\n", $category);
+        }
+
+        if (!$containerHtml) {
             throw new ScraperCategoryContainerNotFoundException();
         }
 
         $matches = [];
-        $categoriesHtml = $this->extractHtml($categoryContainerHtml, $this->scraperConfig['category']['regex'], $matches);
+        $categoriesHtml = $this->extractHtml($containerHtml, $this->scraperConfig['category']['regex'], $matches);
 
         if (!$categoriesHtml) {
             throw new ScraperCategoryLinksNotFoundException();
@@ -38,8 +56,9 @@ class CategoryService
         }
 
         $categoryLinks = array_map(fn($categoryLink) => ScraperUtils::prependBaseUrlIfMissing($this->baseUrl, $categoryLink), $matches[1]);
+        $categoryNames = array_map(fn($categoryName) => ScraperUtils::cleanText($categoryName), $matches[2]);
 
-        return ['category_links' => $categoryLinks, 'category_names' => $matches[2]];
+        return ['category_links' => $categoryLinks, 'category_names' => $categoryNames];
     }
 
 

@@ -22,14 +22,19 @@ class ProductService
         $this->baseUrl = $baseUrl;
         $this->scraperConfig = $scraperConfig;
     }
-    public function getProductsPuppeteer(Generator $categoriesHtml)
+    public function getProductsPuppeteer(Generator $categoriesHtml, $preview = false)
     {
         $products = [];
 
         foreach ($categoriesHtml as  $categoryLink => $categoryHtml) {
             if (empty($categoryHtml)) continue;
 
-            $paginationUrls = array_chunk($this->getPaginationUrls($categoryHtml, $categoryLink), 5);
+            $paginationUrls = [];
+
+            //only get the pagination if it's not a preview
+            if (!$preview) {
+                $paginationUrls = array_chunk($this->getPaginationUrls($categoryHtml, $categoryLink), 5);
+            }
 
             $allPagesHtml = [$categoryHtml];
 
@@ -63,14 +68,18 @@ class ProductService
         return $products;
     }
 
-    public function getProductsAjax(Generator $apiResponses)
+    public function getProductsAjax(Generator $apiResponses, $preview = false)
     {
         $products = [];
         foreach ($apiResponses as $apiUrl => $apiResponse) {
             if (empty($apiResponse)) continue;
 
-            $paginationUrls = $this->getPaginationUrls($apiResponse);
-            $paginationUrls = $this->combineApiQueryParams($apiUrl, $paginationUrls);
+            $paginationUrls = [];
+
+            if (!$preview) {
+                $paginationUrls = $this->getPaginationUrls($apiResponse);
+                $paginationUrls = $this->combineApiQueryParams($apiUrl, $paginationUrls);
+            }
 
             $allApiResponses = [$apiResponse];
 
@@ -83,8 +92,8 @@ class ProductService
             // Process all pages (main + paginated)
             foreach ($allApiResponses as $response) {
                 $productContainerHtml = $this->getProductContainerHtml($response);
-                $productHtmls = $this->getProductsHtml($productContainerHtml);
 
+                $productHtmls = $this->getProductsHtml($productContainerHtml);
                 foreach ($productHtmls as $product) {
                     $products[] = $this->getPageRuleValues($product);
                 }
@@ -124,6 +133,7 @@ class ProductService
         if ($productRegex) {
             $matches = [];
             $this->extractHtml($html, $productRegex, $matches);
+
             return $matches[0];
         } else if ($productSelector) {
             $crawler = new Crawler($html);
@@ -213,7 +223,11 @@ class ProductService
             $basePaginationLink = $categoryLink;
         }
 
-        $urls = array_map(fn($page) => $basePaginationLink . '?' . $pageQuery . $page, $pageNumbers);
+        if (substr($basePaginationLink, -1) != '?') {
+            $basePaginationLink .= '?';
+        }
+
+        $urls = array_map(fn($page) => $basePaginationLink . $pageQuery . $page, $pageNumbers);
         return $urls;
     }
 

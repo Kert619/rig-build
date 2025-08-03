@@ -9,12 +9,12 @@ class StoreController extends Controller
     protected string $modelClass = Store::class;
     protected string $optionColumn = "store_name";
 
-    public function columns(): array
+    protected function columns(): array
     {
         return ['store_id', 'store_name', 'country_code', 'store_url'];
     }
 
-    public function rules(): array
+    protected function rules(): array
     {
         return [
             'store_name' => 'required|string|max:255|unique:stores,store_name',
@@ -23,7 +23,7 @@ class StoreController extends Controller
         ];
     }
 
-    public function updateRules($id): array
+    protected function updateRules($id): array
     {
         return [
             'store_name' => 'required|string|max:255|unique:stores,store_name,' . $id . ',store_id',
