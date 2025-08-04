@@ -64,8 +64,14 @@ class CategoryService
 
     public function fetchCategoryPages(array $categoryLinks)
     {
-        foreach ($categoryLinks as $categoryLink) {
-            yield $categoryLink => $this->fetchSingle($categoryLink);
+        $chunks = array_chunk($categoryLinks, 5);
+
+        foreach ($chunks as $chunk) {
+            $categoriesResponse = $this->fetchMulti($chunk);
+
+            foreach ($categoriesResponse as $response) {
+                yield $response->url => $response->content;
+            }
         }
     }
 

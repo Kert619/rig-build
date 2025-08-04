@@ -18,12 +18,13 @@
       <q-table
         :columns="columns"
         :rows="categories"
+        :loading="loading"
+        :rows-per-page-options="[0]"
         row-key="category_link"
         flat
         bordered
         dense
         square
-        :loading="loading"
       >
         <template v-slot:body-cell-category_link="props">
           <q-td :props="props">

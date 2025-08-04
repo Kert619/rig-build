@@ -29,6 +29,17 @@ export type PreviewPrices = {
   img_url: string;
 };
 
+export type CategoryProcessor = {
+  category_link: string;
+  category_name: string;
+};
+
+export type PaginationProcessor = {
+  category_link: string;
+  pages: string[];
+  $expanded?: boolean;
+};
+
 export type ScraperConfig = {
   settings: ScraperSettings;
   category: ScraperConfigCategory;
@@ -38,6 +49,8 @@ export type ScraperConfig = {
 export type ExtractMethod = 'regex' | 'selector';
 
 export type ScraperSettings = 'puppeteer' | 'ajax' | 'curl';
+
+export type VariantFindWhere = 'page' | 'product';
 
 type ScraperConfigCategory = {
   container_extract_method: ExtractMethod;
@@ -54,8 +67,14 @@ type ScraperConfigProduct = {
   selector: string | null;
   format: ScraperConfigProductFormat;
   page_rules: PageRule[];
+  variant_flag: ScraperConfigVariantFlag;
   pagination: ScraperConfigProductPagination;
   ajax: ScraperConfigProductAjax;
+};
+
+type ScraperConfigVariantFlag = {
+  find_where: VariantFindWhere;
+  regex: string;
 };
 
 type PageRule = {
@@ -76,7 +95,9 @@ type ScraperConfigProductFormat = {
 };
 
 type ScraperConfigProductPagination = {
+  method: ExtractMethod;
   container_regex: string;
+  container_selector: string;
   base_pagination_link: string;
   pages_regex: string;
   page_query: string;
@@ -85,11 +106,6 @@ type ScraperConfigProductPagination = {
 type ScraperConfigProductAjax = {
   api_base_url: string;
   product_link_base_url: string;
-};
-
-export type CategoryProcessor = {
-  category_link: string;
-  category_name: string;
 };
 
 export type ScraperError = {
@@ -111,6 +127,7 @@ export const useScraperStore = defineStore('scraper', () => {
   const currentErrors: Ref<Map<number, ScraperError>> = ref(new Map());
   const previewPrices: Ref<PreviewPrices[]> = ref([]);
   const categoryProcessor: Ref<CategoryProcessor[]> = ref([]);
+  const paginationProcessor: Ref<PaginationProcessor[]> = ref([]);
 
   const fetchIndex = async () => {
     try {
@@ -165,6 +182,7 @@ export const useScraperStore = defineStore('scraper', () => {
     const scraper = current.value.get(id)!;
     try {
       const scraperConfig = scraper.scraper_config;
+
       if (scraperConfig.product.method == 'regex') {
         scraperConfig.product.container_selector = '';
         scraperConfig.product.selector = '';
@@ -177,6 +195,12 @@ export const useScraperStore = defineStore('scraper', () => {
         scraperConfig.category.container_selector = '';
       } else {
         scraperConfig.category.container_regex = '';
+      }
+
+      if (scraperConfig.product.pagination.method == 'regex') {
+        scraperConfig.product.pagination.container_selector = '';
+      } else {
+        scraperConfig.product.pagination.container_regex = '';
       }
 
       currentErrors.value.delete(id);
@@ -259,6 +283,17 @@ export const useScraperStore = defineStore('scraper', () => {
     }
   };
 
+  const processPagination = async (id: number) => {
+    try {
+      const response = await api.post(`scrapers/process-pagination/${id}`);
+      paginationProcessor.value = response.data;
+    } catch (error) {
+      useApiError(error);
+
+      throw error;
+    }
+  };
+
   const normalizeScraperUpdateError = (errors: object, id: number) => {
     const err: ScraperError = {
       scraper_name: '',
@@ -326,6 +361,7 @@ export const useScraperStore = defineStore('scraper', () => {
     currentErrors,
     previewPrices,
     categoryProcessor,
+    paginationProcessor,
     fetchIndex,
     create,
     store,
@@ -334,5 +370,6 @@ export const useScraperStore = defineStore('scraper', () => {
     setActive,
     preview,
     processCategories,
+    processPagination,
   };
 });

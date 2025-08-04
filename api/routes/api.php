@@ -20,6 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('scrapers/set-active/{scraper}', [ScraperController::class, 'setActive']);
     Route::post('scrapers/process-categories/{scraperId}', [ScraperController::class, 'processCategories']);
+    Route::post('scrapers/process-pagination/{scraperId}', [ScraperController::class, 'processPagination']);
     Route::get('scrapers/preview/{scraperId}', [ScraperController::class, 'preview']);
     Route::apiResource('scrapers', ScraperController::class);
 

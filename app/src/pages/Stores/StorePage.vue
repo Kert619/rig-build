@@ -70,6 +70,7 @@
         @preview="scraperPricesOpen = true"
         @open-selector-debug="querySelectorDebuggerOpen = true"
         @process-category="categoryProcessorOpen = true"
+        @process-pagination="paginationProcessorOpen = true"
       />
     </q-dialog>
 
@@ -89,6 +90,14 @@
       />
     </q-dialog>
 
+    <q-dialog v-model="paginationProcessorOpen" full-width full-height square persistent>
+      <PaginationProcessorDialog
+        v-if="scraperPreview"
+        :scraper="scraperPreview"
+        @hide="paginationProcessorOpen = false"
+      />
+    </q-dialog>
+
     <QuerySelectorDebugger v-model="querySelectorDebuggerOpen" />
   </div>
 </template>
@@ -102,10 +111,11 @@ import { type QTableColumn, useQuasar } from 'quasar';
 import { type Scraper, useScraperStore } from 'src/stores/scraper';
 import ScraperCreate from 'components/Scraper/ScraperCreate.vue';
 import ScraperEdit from 'components/Scraper/ScraperEdit.vue';
-import ScraperDialog from 'components/Scraper/ScraperDialog.vue';
-import ScraperPricesPreviewDialog from 'components/Scraper/ScraperPricesPreviewDialog.vue';
-import QuerySelectorDebugger from 'components/Scraper/QuerySelectorDebugger.vue';
-import CategoryProcessorDialog from 'components/Scraper/CategoryProcessorDialog.vue';
+import ScraperDialog from 'components/Scraper/ScraperPreview/ScraperDialog.vue';
+import ScraperPricesPreviewDialog from 'components/Scraper/ScraperPreview/ScraperPricesPreviewDialog.vue';
+import QuerySelectorDebugger from 'components/Scraper/ScraperPreview/QuerySelectorDebugger.vue';
+import CategoryProcessorDialog from 'components/Scraper/ScraperPreview/CategoryProcessorDialog.vue';
+import PaginationProcessorDialog from 'components/Scraper/ScraperPreview/PaginationProcessorDialog.vue';
 
 const $q = useQuasar();
 const route = useRoute();
@@ -117,6 +127,7 @@ const scraperPreviewOpen = ref(false);
 const scraperPricesOpen = ref(false);
 const querySelectorDebuggerOpen = ref(false);
 const categoryProcessorOpen = ref(false);
+const paginationProcessorOpen = ref(false);
 let scraperPreview: Scraper | null;
 
 const columns: QTableColumn[] = [

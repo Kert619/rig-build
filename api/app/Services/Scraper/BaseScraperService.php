@@ -5,6 +5,7 @@ namespace App\Services\Scraper;
 use App\Contracts\ScraperInterface;
 use App\Models\Scraper;
 use App\Traits\ScrapePage;
+use Illuminate\Support\Facades\Log;
 
 abstract class BaseScraperService implements ScraperInterface
 {

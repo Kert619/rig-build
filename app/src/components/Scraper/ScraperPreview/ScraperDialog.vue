@@ -45,7 +45,10 @@
 
           <div>
             <q-chip label="Pagination" size="sm" color="primary" />
-            <ScraperDialogPaginationSection :scraper="scraperRef" />
+            <ScraperDialogPaginationSection
+              :scraper="scraperRef"
+              @process-pagination="emit('processPagination')"
+            />
           </div>
 
           <div>
@@ -59,6 +62,9 @@
             :scraper="scraperRef"
             :error="scraperStore.currentErrors.get(scraperRef.scraper_id)"
           />
+
+          <q-chip label="Variant" size="sm" color="primary" />
+          <ScraperDialogVariantSection :scraper="scraperRef" />
         </div>
         <div class="col-2 border q-pa-md column q-gutter-y-md">
           <q-chip label="Format" size="sm" color="primary" class="self-start" icon-right="info">
@@ -116,13 +122,14 @@
 <script setup lang="ts">
 import { useScraperStore, type Scraper } from 'src/stores/scraper';
 import { computed, ref, toRef } from 'vue';
-import ScraperDialogScraperSection from 'components/Scraper/ScraperDialogScraperSection.vue';
-import ScraperDialogCategorySection from 'components/Scraper/ScraperDialogCategorySection.vue';
-import ScraperDialogProductSection from 'components/Scraper/ScraperDialogProductSection.vue';
-import ScraperDialogFormatSection from 'components/Scraper/ScraperDialogFormatSection.vue';
-import ScraperDialogPageRulesSection from 'components/Scraper/ScraperDialogPageRulesSection.vue';
-import ScraperDialogPaginationSection from 'components/Scraper/ScraperDialogPaginationSection.vue';
-import ScraperDialogAjaxSection from 'components/Scraper/ScraperDialogAjaxSection.vue';
+import ScraperDialogScraperSection from 'components/Scraper/ScraperPreview/ScraperDialogScraperSection.vue';
+import ScraperDialogCategorySection from 'components/Scraper/ScraperPreview/ScraperDialogCategorySection.vue';
+import ScraperDialogProductSection from 'components/Scraper/ScraperPreview/ScraperDialogProductSection.vue';
+import ScraperDialogFormatSection from 'components/Scraper/ScraperPreview/ScraperDialogFormatSection.vue';
+import ScraperDialogPageRulesSection from 'components/Scraper/ScraperPreview/ScraperDialogPageRulesSection.vue';
+import ScraperDialogPaginationSection from 'components/Scraper/ScraperPreview/ScraperDialogPaginationSection.vue';
+import ScraperDialogAjaxSection from 'components/Scraper/ScraperPreview/ScraperDialogAjaxSection.vue';
+import ScraperDialogVariantSection from 'components/Scraper/ScraperPreview/ScraperDialogVariantSection.vue';
 import { useQuasar } from 'quasar';
 
 const emit = defineEmits<{
@@ -131,6 +138,7 @@ const emit = defineEmits<{
   preview: [id: number];
   openSelectorDebug: [];
   processCategory: [];
+  processPagination: [];
 }>();
 
 const props = defineProps<{

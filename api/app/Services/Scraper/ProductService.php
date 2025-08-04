@@ -43,12 +43,8 @@ class ProductService
                 foreach ($paginationUrls as $chunk) {
                     $pages = $this->fetchMulti($chunk);
 
-                    if (!empty($pages->results)) {
-                        array_push($allPagesHtml, ...$pages->results);
-                    }
-
-                    foreach ($pages->errors as $error) {
-                        Log::error((array) $error);
+                    if (!empty($pages->content)) {
+                        array_push($allPagesHtml, ...$pages->content);
                     }
                 }
             }
@@ -208,14 +204,35 @@ class ProductService
         return ScraperUtils::cleanText($matches[$group]);
     }
 
-    private function getPaginationUrls(string $html, $categoryLink = '',)
+    public function getPaginationUrls(string $html, $categoryLink = '',)
     {
-        if (!$this->scraperConfig['product']['pagination']['container_regex']) return [];
+        $method = $this->scraperConfig['product']['pagination']['method'];
+        $containerRegex = $this->scraperConfig['product']['pagination']['container_regex'];
+        $containerSelector = $this->scraperConfig['product']['pagination']['container_selector'];
 
-        $paginationContainer = $this->extractHtml($html, $this->scraperConfig['product']['pagination']['container_regex']);
-        if (!$paginationContainer) return [];
+        if ($method == 'regex') {
+            if (!$containerRegex) return [];
+        } else if ($method == 'selector') {
+            if (!$containerSelector) return [];
+        }
 
-        $pageNumbers = $this->getPaginationPages($paginationContainer);
+        $paginationContainerHtml = '';
+
+        if ($method == 'regex') {
+            $paginationContainerHtml = $this->extractHtml($html, $containerRegex);
+        } else if ($method == 'selector') {
+            $crawler = new Crawler($html);
+            $pagination = $crawler->filter($containerSelector)->each(
+                fn(Crawler $node) =>
+                $node->getNode(0)->ownerDocument->saveHTML($node->getNode(0))
+            );
+
+            $paginationContainerHtml = implode("\n", $pagination);
+        }
+
+        if (!$paginationContainerHtml) return [];
+
+        $pageNumbers = $this->getPaginationPages($paginationContainerHtml);
         $pageQuery = $this->scraperConfig['product']['pagination']['page_query'];
         $basePaginationLink = $this->scraperConfig['product']['pagination']['base_pagination_link'];
 
@@ -254,7 +271,7 @@ class ProductService
         }
     }
 
-    private function combineApiQueryParams(string $sourceUrl, array $targetUrls)
+    public function combineApiQueryParams(string $sourceUrl, array $targetUrls)
     {
         if (empty($targetUrls)) return [];
 

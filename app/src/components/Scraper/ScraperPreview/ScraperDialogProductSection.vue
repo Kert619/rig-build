@@ -26,6 +26,13 @@
           <q-tooltip>The regex for the product container</q-tooltip>
         </q-icon>
       </template>
+
+      <template #label>
+        <div class="q-mb-md">
+          <span>Container Regex</span>
+          <span class="text-negative text-h6">*</span>
+        </div>
+      </template>
     </TextInput>
     <TextInput
       label="Regex"
@@ -37,6 +44,13 @@
         <q-icon name="info" size="xs">
           <q-tooltip>The regex for the individual product item</q-tooltip>
         </q-icon>
+      </template>
+
+      <template #label>
+        <div class="q-mb-md">
+          <span>Regex</span>
+          <span class="text-negative text-h6">*</span>
+        </div>
       </template>
     </TextInput>
   </template>
@@ -53,6 +67,13 @@
           <q-tooltip>The selector for the product container</q-tooltip>
         </q-icon>
       </template>
+
+      <template #label>
+        <div class="q-mb-md">
+          <span>Container Selector</span>
+          <span class="text-negative text-h6">*</span>
+        </div>
+      </template>
     </TextInput>
     <TextInput
       label="Selector"
@@ -64,6 +85,13 @@
         <q-icon name="info" size="xs">
           <q-tooltip>The selector for the individual product item</q-tooltip>
         </q-icon>
+      </template>
+
+      <template #label>
+        <div class="q-mb-md">
+          <span>Selector</span>
+          <span class="text-negative text-h6">*</span>
+        </div>
       </template>
     </TextInput>
   </template>

@@ -37,6 +37,13 @@
         <q-tooltip>The base URL of the scraper</q-tooltip>
       </q-icon>
     </template>
+
+    <template #label>
+      <div class="q-mb-md">
+        <span>Store Scraper URL</span>
+        <span class="text-negative text-h6">*</span>
+      </div>
+    </template>
   </TextInput>
 
   <TextInput
@@ -51,6 +58,13 @@
           >The name of the scraper, it can be whatever you want as long as it's unique.</q-tooltip
         >
       </q-icon>
+    </template>
+
+    <template #label>
+      <div class="q-mb-md">
+        <span>Scraper Name</span>
+        <span class="text-negative text-h6">*</span>
+      </div>
     </template>
   </TextInput>
 </template>

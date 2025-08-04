@@ -4,7 +4,14 @@
     v-model="scraperRef.scraper_config.product.format.currency"
     :error="!!error?.scraper_config?.product.format.currency"
     :error-message="error?.scraper_config?.product.format.currency.toString()"
-  />
+  >
+    <template #label>
+      <div class="q-mb-md">
+        <span>Currency</span>
+        <span class="text-negative text-h6">*</span>
+      </div>
+    </template>
+  </TextInput>
   <TextInput
     label="Price Store Ident"
     v-model="scraperRef.scraper_config.product.format.price_store_ident"

@@ -26,8 +26,10 @@ return new class extends Migration
                 'container_selector' => '',
                 'selector' => '',
                 'pagination' => [
-                    'base_pagination_link' => '',
+                    'method' => 'regex',
                     'container_regex' => '',
+                    'container_selector' => '',
+                    'base_pagination_link' => '',
                     'page_query' => '',
                     'pages_regex' => '',
                 ],
@@ -47,6 +49,10 @@ return new class extends Migration
                     'stock_status' => '',
                 ],
                 'page_rules' => [],
+                'variant_flag' => [
+                    'find_where' => 'product',
+                    'regex' => ''
+                ]
             ],
         ]);
 

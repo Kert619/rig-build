@@ -52,4 +52,27 @@ class PuppeteerScraperService extends BaseScraperService
             if (count($products)) return $products;
         }
     }
+
+    public function processPagination()
+    {
+        $html = $this->fetchSingle($this->scraper->scraper_url);
+        $chunks = array_chunk($this->categoryService->getCategoryLinks($html)['category_links'], 5);
+
+        $urls = [];
+
+        foreach ($chunks as $chunk) {
+            $categoriesResponse = $this->fetchMulti($chunk);
+
+            foreach ($categoriesResponse as $response) {
+                $paginationUrls = $this->productService->getPaginationUrls($response->content, $response->url);
+
+                $item = [];
+                $item['category_link'] = $response->url;
+                $item['pages'] = $paginationUrls;
+                $urls[] = $item;
+            }
+        }
+
+        return $urls;
+    }
 }

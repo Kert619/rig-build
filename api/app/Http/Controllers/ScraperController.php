@@ -58,13 +58,18 @@ class ScraperController extends Controller
 
             'scraper_config.product.page_rules' => 'required|array',
 
+            'scraper_config.product.pagination.method' => 'required|in:regex,selector',
             'scraper_config.product.pagination.container_regex' => 'nullable|string',
+            'scraper_config.product.pagination.container_selector' => 'nullable|string',
             'scraper_config.product.pagination.base_pagination_link' => 'nullable|string',
             'scraper_config.product.pagination.pages_regex' => 'nullable|string',
             'scraper_config.product.pagination.page_query' => 'nullable|string',
 
             'scraper_config.product.ajax.api_base_url' => 'nullable|string',
             'scraper_config.product.ajax.product_link_base_url' => 'nullable|string',
+
+            'scraper_config.product.variant_flag.find_where' => 'required|in:page,product',
+            'scraper_config.product.variant_flag.regex' => 'nullable|string'
         ];
     }
 
@@ -82,6 +87,8 @@ class ScraperController extends Controller
             'scraper_config.product.method' => 'method',
             'scraper_config.product.page_rules' => 'page rules',
             'scraper_config.product.format.currency' => 'currency',
+            'scraper_config.product.pagination.method' => 'pagination method',
+            'scraper_config.product.variant_flag.find_where' => 'find where'
         ];
     }
 
@@ -101,6 +108,13 @@ class ScraperController extends Controller
 
     public function processCategories(ScraperFactory $scraperFactory, int $scraperId)
     {
+        set_time_limit(0);
         return $scraperFactory->make($scraperId)->processCategories();
+    }
+
+    public function processPagination(ScraperFactory $scraperFactory, int $scraperId)
+    {
+        set_time_limit(0);
+        return $scraperFactory->make($scraperId)->processPagination();
     }
 }

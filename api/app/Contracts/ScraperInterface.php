@@ -9,4 +9,6 @@ interface ScraperInterface
     public function preview();
 
     public function processCategories();
+
+    public function processPagination();
 }

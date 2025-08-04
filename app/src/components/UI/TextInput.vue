@@ -34,6 +34,10 @@
     <template #after v-if="$slots.after">
       <slot name="after" />
     </template>
+
+    <template #label v-if="$slots.label">
+      <slot name="label" />
+    </template>
   </q-input>
 </template>
 

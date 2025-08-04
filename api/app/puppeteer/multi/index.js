@@ -17,12 +17,12 @@ import { loadWithRetry } from "../shared/retry-load.js";
         },
     });
 
-    const errors = [];
-
     const pages = await Promise.all(urls.map(() => browser.newPage()));
 
     const responses = await Promise.all(
         pages.map(async (page, i) => {
+            const url = urls[i];
+
             try {
                 const randomUserAgent =
                     userAgents[Math.floor(Math.random() * userAgents.length)];
@@ -36,40 +36,30 @@ import { loadWithRetry } from "../shared/retry-load.js";
                     "Sec-CH-UA-Platform": '"Windows"',
                 });
 
-                const response = await loadWithRetry(page, urls[i]);
-                return { page, response, url: urls[i] };
+                const response = await loadWithRetry(page, url);
+                return { page, response, url };
             } catch (error) {
-                errors.push({
-                    url: urls[i],
-                    error: error.message,
-                    status: 500,
-                });
-                return null;
+                return { page, response: null, url };
             }
         })
     );
 
     let results = await Promise.all(
         responses.map(async (response) => {
-            if (!response || !response.response) return null;
-
-            const status = response.response.status();
-
-            if (status >= 400) {
-                errors.push({
-                    url: response.url,
-                    error: `${status} error`,
-                    status,
-                });
-                return null;
+            if (!response || !response.response) {
+                return { url: response.url, content: "" };
             }
 
-            return await response.page.content();
+            try {
+                const content = await response.page.content();
+
+                return { url: response.url, content };
+            } catch {
+                return { url: response.url, content: "" };
+            }
         })
     );
 
-    results = results.filter((result) => !!result);
-
     await browser.close();
-    console.log(JSON.stringify({ results, errors }));
+    console.log(JSON.stringify(results));
 })();

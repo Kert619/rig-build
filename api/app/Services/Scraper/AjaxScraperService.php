@@ -51,4 +51,26 @@ class AjaxScraperService extends BaseScraperService
             if (count($products)) return $products;
         }
     }
+
+    public function processPagination()
+    {
+        $html = $this->fetchSingle($this->scraper->scraper_url);
+        $categoryLinks = $this->categoryService->getCategoryLinks($html)['category_links'];
+
+        $generator = $this->categoryService->fetchCategoryPagesAjax($categoryLinks);
+
+        $urls = [];
+
+        foreach ($generator as $apiUrl => $apiResponse) {
+            $paginationUrls = $this->productService->getPaginationUrls($apiResponse);
+            $paginationUrls = $this->productService->combineApiQueryParams($apiUrl, $paginationUrls);
+
+            $item = [];
+            $item['category_link'] = $apiUrl;
+            $item['pages'] = $paginationUrls;
+            $urls[] = $item;
+        }
+
+        return $urls;
+    }
 }
