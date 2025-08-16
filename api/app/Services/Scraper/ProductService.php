@@ -73,7 +73,10 @@ class ProductService
             $paginationUrls = [];
 
             if (!$preview) {
-                $paginationUrls = $this->getPaginationUrls($apiResponse);
+                $parsedUrl = parse_url($apiUrl);
+                $baseUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . $parsedUrl['path'];
+
+                $paginationUrls = $this->getPaginationUrls($apiResponse, $baseUrl);
                 $paginationUrls = $this->combineApiQueryParams($apiUrl, $paginationUrls);
             }
 
@@ -204,7 +207,7 @@ class ProductService
         return ScraperUtils::cleanText($matches[$group]);
     }
 
-    public function getPaginationUrls(string $html, $categoryLink = '',)
+    public function getPaginationUrls(string $html, string $categoryLink)
     {
         $method = $this->scraperConfig['product']['pagination']['method'];
         $containerRegex = $this->scraperConfig['product']['pagination']['container_regex'];
@@ -234,17 +237,13 @@ class ProductService
 
         $pageNumbers = $this->getPaginationPages($paginationContainerHtml);
         $pageQuery = $this->scraperConfig['product']['pagination']['page_query'];
-        $basePaginationLink = $this->scraperConfig['product']['pagination']['base_pagination_link'];
+        $querySeparator = $this->scraperConfig['product']['pagination']['query_separator'];
 
-        if (empty($basePaginationLink) && $categoryLink) {
-            $basePaginationLink = $categoryLink;
+        if (substr($categoryLink, -1) != $querySeparator) {
+            $categoryLink .= $querySeparator;
         }
 
-        if (substr($basePaginationLink, -1) != '?') {
-            $basePaginationLink .= '?';
-        }
-
-        $urls = array_map(fn($page) => $basePaginationLink . $pageQuery . $page, $pageNumbers);
+        $urls = array_map(fn($page) => $categoryLink . $pageQuery . $page, $pageNumbers);
         return $urls;
     }
 

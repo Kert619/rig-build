@@ -49,12 +49,14 @@
   </TextInput>
 
   <TextInput
-    label="Base Pagination Link"
-    v-model="scraperRef.scraper_config.product.pagination.base_pagination_link"
+    label="Query Separator"
+    v-model="scraperRef.scraper_config.product.pagination.query_separator"
+    :error="!!error?.scraper_config?.product.pagination.query_separator"
+    :error-message="error?.scraper_config?.product.pagination.query_separator.toString()"
   >
     <template #append>
       <q-icon name="info" size="xs">
-        <q-tooltip>The base URL for the pagination link</q-tooltip>
+        <q-tooltip>The character to use for query separator. It could be "?" or "/".</q-tooltip>
       </q-icon>
     </template>
   </TextInput>
@@ -77,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Scraper } from 'src/stores/scraper';
+import { type ScraperError, type Scraper } from 'src/stores/scraper';
 import { toRef } from 'vue';
 import TextInput from 'components/UI/TextInput.vue';
 
@@ -87,6 +89,7 @@ const emit = defineEmits<{
 
 const props = defineProps<{
   scraper: Scraper;
+  error?: ScraperError | undefined;
 }>();
 
 const scraperRef = toRef(props.scraper);

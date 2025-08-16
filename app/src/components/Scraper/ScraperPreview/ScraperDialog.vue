@@ -47,6 +47,7 @@
             <q-chip label="Pagination" size="sm" color="primary" />
             <ScraperDialogPaginationSection
               :scraper="scraperRef"
+              :error="scraperStore.currentErrors.get(scraperRef.scraper_id)"
               @process-pagination="emit('processPagination')"
             />
           </div>

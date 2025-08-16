@@ -1,19 +1,4 @@
 <template>
-  <div class="q-my-sm">
-    <q-btn-toggle
-      unelevated
-      size="sm"
-      dense
-      glossy
-      v-model="scraperRef.scraper_config.product.variant_flag.find_where"
-      toggle-color="primary"
-      :options="[
-        { label: 'Page', value: 'page' },
-        { label: 'Product', value: 'product' },
-      ]"
-    />
-  </div>
-
   <TextInput v-model="scraperRef.scraper_config.product.variant_flag.regex" label="Regex">
     <template #append>
       <q-icon name="info" size="xs">

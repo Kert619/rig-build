@@ -29,6 +29,7 @@ return new class extends Migration
 
             $table->index(['brand_id', 'node_id']);
             $table->index(['category_id', 'node_id']);
+            $table->index(['store_id', 'price_store_ident', 'currency']);
         });
     }
 

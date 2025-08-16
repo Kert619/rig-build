@@ -29,7 +29,7 @@ return new class extends Migration
                     'method' => 'regex',
                     'container_regex' => '',
                     'container_selector' => '',
-                    'base_pagination_link' => '',
+                    'query_separator' => '',
                     'page_query' => '',
                     'pages_regex' => '',
                 ],
@@ -50,7 +50,6 @@ return new class extends Migration
                 ],
                 'page_rules' => [],
                 'variant_flag' => [
-                    'find_where' => 'product',
                     'regex' => ''
                 ]
             ],

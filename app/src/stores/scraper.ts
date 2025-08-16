@@ -50,8 +50,6 @@ export type ExtractMethod = 'regex' | 'selector';
 
 export type ScraperSettings = 'puppeteer' | 'ajax' | 'curl';
 
-export type VariantFindWhere = 'page' | 'product';
-
 type ScraperConfigCategory = {
   container_extract_method: ExtractMethod;
   container_regex: string;
@@ -73,7 +71,6 @@ type ScraperConfigProduct = {
 };
 
 type ScraperConfigVariantFlag = {
-  find_where: VariantFindWhere;
   regex: string;
 };
 
@@ -98,7 +95,7 @@ type ScraperConfigProductPagination = {
   method: ExtractMethod;
   container_regex: string;
   container_selector: string;
-  base_pagination_link: string;
+  query_separator: string;
   pages_regex: string;
   page_query: string;
 };
@@ -312,7 +309,7 @@ export const useScraperStore = defineStore('scraper', () => {
           selector: '',
           ajax: { api_base_url: '', product_link_base_url: '' },
           pagination: {
-            base_pagination_link: '',
+            query_separator: '',
             container_regex: '',
             page_query: '',
             pages_regex: '',

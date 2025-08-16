@@ -62,7 +62,10 @@ class AjaxScraperService extends BaseScraperService
         $urls = [];
 
         foreach ($generator as $apiUrl => $apiResponse) {
-            $paginationUrls = $this->productService->getPaginationUrls($apiResponse);
+            $parsedUrl = parse_url($apiUrl);
+            $baseUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . $parsedUrl['path'];
+
+            $paginationUrls = $this->productService->getPaginationUrls($apiResponse, $baseUrl);
             $paginationUrls = $this->productService->combineApiQueryParams($apiUrl, $paginationUrls);
 
             $item = [];
